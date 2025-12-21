@@ -713,7 +713,7 @@ class MusicPlayer {
             { name: '无罪', src: 'music/无罪.mp3', cover: 'images/covers/无罪.png' },
             { name: '我的世界只能容下一个你', src: 'music/我的世界只能容下一个你.mp3', cover: 'images/covers/我的世界只能容下一个你.png' }
         ];
-        this.index = 0;
+        this.index = -1; // -1 表示没有选择歌曲，保持 initial 封面
         this.isPlaying = false;
         if(this.audio) this.init();
     }
@@ -748,8 +748,28 @@ class MusicPlayer {
         
         document.getElementById('volumeBar').oninput = (e) => this.audio.volume = e.target.value / 100;
         
-        // Load first song
-        this.load(0, false);
+        // 监听语言变化，更新"未选择歌曲"文本
+        window.addEventListener('languageChanged', () => {
+            this.updateNoSongText();
+        });
+        
+        // 初始化"未选择歌曲"文本
+        this.updateNoSongText();
+        
+        // 不自动加载第一首歌曲，保持 initial 封面
+        // 只有当用户点击歌曲列表时才加载封面
+    }
+    
+    updateNoSongText() {
+        // 只有在没有选择歌曲时才更新文本
+        if (this.index === -1) {
+            const currentSongNameEl = document.getElementById('currentSongName');
+            if (currentSongNameEl && languageManager) {
+                currentSongNameEl.textContent = languageManager.t('music.noSong');
+                // 确保有 data-i18n 属性，这样语言切换时能自动更新
+                currentSongNameEl.setAttribute('data-i18n', 'music.noSong');
+            }
+        }
     }
     
     renderList() {
@@ -771,7 +791,10 @@ class MusicPlayer {
         const src = song.src.includes('?') ? `${song.src}&t=${timestamp}` : `${song.src}?t=${timestamp}`;
         
         this.audio.src = src;
-        document.getElementById('currentSongName').textContent = song.name;
+        const currentSongNameEl = document.getElementById('currentSongName');
+        currentSongNameEl.textContent = song.name;
+        // 移除 data-i18n 属性，因为现在显示的是歌曲名称，不是翻译文本
+        currentSongNameEl.removeAttribute('data-i18n');
         
         // 封面处理
         const coverSrc = song.cover.includes('?') ? `${song.cover}&t=${timestamp}` : `${song.cover}?t=${timestamp}`;
@@ -790,6 +813,15 @@ class MusicPlayer {
     }
     
     toggle() {
+        // 如果没有选择歌曲，提示用户先选择
+        if (this.index === -1 || !this.audio.src) {
+            // 如果歌曲列表不为空，自动加载第一首
+            if (this.songs.length > 0) {
+                this.load(0, true);
+            }
+            return;
+        }
+        
         if(this.isPlaying) {
             this.audio.pause();
         } else {
@@ -806,7 +838,8 @@ class MusicPlayer {
     }
     
     skip(dir) {
-        let i = this.index + dir;
+        // 如果没有选择歌曲，从第一首或最后一首开始
+        let i = this.index === -1 ? (dir > 0 ? 0 : this.songs.length - 1) : this.index + dir;
         if(i < 0) i = this.songs.length - 1;
         if(i >= this.songs.length) i = 0;
         this.load(i, true);

@@ -707,8 +707,8 @@ class MusicPlayer {
             { name: '梦游', src: 'music/梦游.mp3', cover: 'images/covers/梦游.png' },
             { name: '自导自演', src: 'music/自导自演.mp3', cover: 'images/covers/自导自演.png' },
             { name: '入戏', src: 'music/入戏.mp3', cover: 'images/covers/入戏.png' },
-            { name: '月光', src: 'music/月光.mp3', cover: 'images/covers/月光.PNG' },
-            { name: '不妨', src: 'music/不妨.mp3', cover: 'images/covers/不妨.PNG' },
+            { name: '月光', src: 'music/月光.mp3', cover: 'images/covers/月光.png' },
+            { name: '不妨', src: 'music/不妨.mp3', cover: 'images/covers/不妨.png' },
             { name: '刚好', src: 'music/刚好.mp3', cover: 'images/covers/刚好.png' },
             { name: '无罪', src: 'music/无罪.mp3', cover: 'images/covers/无罪.png' },
             { name: '我的世界只能容下一个你', src: 'music/我的世界只能容下一个你.mp3', cover: 'images/covers/我的世界只能容下一个你.png' }
@@ -776,7 +776,7 @@ class MusicPlayer {
         // 封面处理
         const coverSrc = song.cover.includes('?') ? `${song.cover}&t=${timestamp}` : `${song.cover}?t=${timestamp}`;
         this.cover.src = coverSrc;
-        this.cover.onerror = () => { this.cover.src = 'images/covers/initial.PNG'; }; 
+        this.cover.onerror = () => { this.cover.src = 'images/covers/initial.png'; }; 
         
         // 列表高亮
         Array.from(document.getElementById('playlist').children).forEach((el, idx) => el.classList.toggle('active', idx === i));

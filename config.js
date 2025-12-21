@@ -15,6 +15,13 @@ const CONFIG = {
     // API端点配置
     API_ENDPOINT: '/api', // 生产环境使用相对路径
     
+    // Supabase Storage 配置（用于视频文件）
+    // 格式：https://你的项目ID.supabase.co/storage/v1/object/public/存储桶名称/
+    // 例如：https://aephgzvwsgjjdeifripx.supabase.co/storage/v1/object/public/videos/
+    SUPABASE_STORAGE_URL: 'https://aephgzvwsgjjdeifripx.supabase.co/storage/v1/object/public/videos/', // 如果为空，则使用本地路径（开发环境）
+    // ⚠️ 填入：Supabase Storage 的公开 URL（在 Storage → 你的存储桶 → 文件详情中可以看到）
+    // 示例：'https://aephgzvwsgjjdeifripx.supabase.co/storage/v1/object/public/videos/'
+    
     // 开发环境自动检测
     isDevelopment: window.location.hostname === 'localhost' || 
                    window.location.hostname === '127.0.0.1' ||

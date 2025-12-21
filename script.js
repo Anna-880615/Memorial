@@ -19,6 +19,9 @@ class LanguageManager {
                 'flower.title': '送花', 'flower.btn6': '送 6 朵花', 'flower.btn15': '送 15 朵花',
                 'flower.limit': '今天最多只能送', 'flower.remaining': '朵花', 'flower.unit': '朵',
                 'flower.counter': '今日已送：', 'flower.total': '送花总数：',
+                'flower.limit.reached': '今天最多只能送 {max} 朵花，您还可以送 {remaining} 朵',
+                'flower.error.failed': '送花失败，请稍后重试',
+                'flower.error.invalid': '送花数量无效',
                 'notice.title': '网站说明',
                 'notice.section1.title': '1. 网站目的', 'notice.section1.content': '该网站的目的是为了纪念朦胧，非赢利性网站。',
                 'notice.section2.title': '2. 留言规范', 'notice.section2.content': '请各位用户妥善留言，不要发布敏感词汇或者是任何涉及言语攻击、暴力等内容。',
@@ -44,6 +47,9 @@ class LanguageManager {
                 'flower.title': 'Send Flowers', 'flower.btn6': 'Send 6 Flowers', 'flower.btn15': 'Send 15 Flowers',
                 'flower.limit': 'You can only send', 'flower.remaining': ' more flowers', 'flower.unit': ' flowers',
                 'flower.counter': 'Today sent: ', 'flower.total': 'Total sent: ',
+                'flower.limit.reached': 'You can only send {max} flowers today. You can still send {remaining} more',
+                'flower.error.failed': 'Failed to send flowers. Please try again later',
+                'flower.error.invalid': 'Invalid flower count',
                 'notice.title': 'Website Notice',
                 'notice.section1.title': '1. Website Purpose', 'notice.section1.content': 'This website is created to commemorate Alan Yu. It is a non-profit website.',
                 'notice.section2.title': '2. Message Guidelines', 'notice.section2.content': 'Please be respectful. No sensitive or offensive content.',
@@ -466,7 +472,9 @@ class FlowerSection {
             const remaining = this.max - this.count;
             let msg;
             if (languageManager) {
-                msg = `${languageManager.t('flower.limit')} ${this.max}，您还可以送${remaining}朵。`;
+                msg = languageManager.t('flower.limit.reached')
+                    .replace('{max}', this.max)
+                    .replace('{remaining}', remaining);
             } else {
                 msg = `今天最多只能送${this.max}朵花，您还可以送${remaining}朵。`;
             }
@@ -501,11 +509,37 @@ class FlowerSection {
                 this.createHearts(num);
                 this.updateDisplay();
             } else {
-                alert(result.message || '送花失败，请稍后重试');
+                // 使用语言系统的错误提示
+                // 如果 API 返回的错误信息包含特定关键词，使用对应的翻译
+                let errorMsg;
+                if (languageManager) {
+                    if (result.message && result.message.includes('最多只能送')) {
+                        // API 返回了限制错误，使用限制提示
+                        const match = result.message.match(/(\d+)/g);
+                        if (match && match.length >= 2) {
+                            const max = match[0];
+                            const remaining = match[1];
+                            errorMsg = languageManager.t('flower.limit.reached')
+                                .replace('{max}', max)
+                                .replace('{remaining}', remaining);
+                        } else {
+                            errorMsg = languageManager.t('flower.error.failed');
+                        }
+                    } else {
+                        errorMsg = languageManager.t('flower.error.failed');
+                    }
+                } else {
+                    errorMsg = result.message || '送花失败，请稍后重试';
+                }
+                alert(errorMsg);
             }
         } catch (error) {
             console.error('送花失败:', error);
-            alert('送花失败，请稍后重试');
+            // 使用语言系统的错误提示
+            const errorMsg = languageManager 
+                ? languageManager.t('flower.error.failed')
+                : '送花失败，请稍后重试';
+            alert(errorMsg);
         } finally {
             btn6.disabled = false;
             btn15.disabled = false;
@@ -592,19 +626,19 @@ class MediaPlayer {
         this.title = document.getElementById('mvCurrentTitle');
         // MV 数据完整保留
         this.mvs = [
-            { name: '星火', src: 'videos/星火.mp4' },
-            { name: '梦未完待续', src: 'videos/梦未完待续.mp4' },
-            { name: '你早就知道', src: 'videos/你早就知道.mp4' },
-            { name: '镜', src: 'videos/镜.mp4' },
-            { name: '月朦胧鸟朦胧', src: 'videos/月朦胧鸟朦胧.mp4' },
-            { name: '月光', src: 'videos/月光.mp4' },
-            { name: '自导自演', src: 'videos/自导自演.mp4' },
-            { name: '入戏', src: 'videos/入戏.mp4' },
-            { name: '一个人过', src: 'videos/一个人过.mp4' },
-            { name: '不妨', src: 'videos/不妨.mp4' },
-            { name: '无罪', src: 'videos/无罪.mp4' },
-            { name: '凝视', src: 'videos/凝视.mp4' },
-            { name: '梦游', src: 'videos/梦游.mp4' }
+            { name: '星火', src: 'videos/xinghuo.mp4' },
+            { name: '梦未完待续', src: 'videos/mengweiwandaixu.mp4' },
+            { name: '你早就知道', src: 'videos/nizaojiuzhidao.mp4' },
+            { name: '镜', src: 'videos/jing.mp4' },
+            { name: '月朦胧鸟朦胧', src: 'videos/yuemenglongniaomenglong.mp4' },
+            { name: '月光', src: 'videos/yueguang.mp4' },
+            { name: '自导自演', src: 'videos/zidaoziyan.mp4' },
+            { name: '入戏', src: 'videos/ruxi.mp4' },
+            { name: '一个人过', src: 'videos/yigerenguo.mp4' },
+            { name: '不妨', src: 'videos/bufang.mp4' },
+            { name: '无罪', src: 'videos/wuzui.mp4' },
+            { name: '凝视', src: 'videos/ningshi.mp4' },
+            { name: '梦游', src: 'videos/mengyou.mp4' }
         ];
         if(this.list) this.init();
     }
@@ -630,9 +664,17 @@ class MediaPlayer {
         if(i < 0 || i >= this.mvs.length) return;
         const mv = this.mvs[i];
         
+        // 获取视频 URL（优先使用 Supabase Storage，否则使用本地路径）
+        let videoUrl = mv.src;
+        if (typeof CONFIG !== 'undefined' && CONFIG.SUPABASE_STORAGE_URL) {
+            // 使用 Supabase Storage URL
+            const fileName = mv.src.replace('videos/', '');
+            videoUrl = CONFIG.SUPABASE_STORAGE_URL + fileName;
+        }
+        
         // 加上时间戳防止缓存
         const timestamp = new Date().getTime();
-        const src = mv.src.includes('?') ? `${mv.src}&t=${timestamp}` : `${mv.src}?t=${timestamp}`;
+        const src = videoUrl.includes('?') ? `${videoUrl}&t=${timestamp}` : `${videoUrl}?t=${timestamp}`;
         
         this.video.src = src;
         if(this.title) this.title.textContent = mv.name;

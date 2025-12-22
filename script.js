@@ -645,10 +645,58 @@ class FlowerSection {
         document.getElementById('flowerBtn15').onclick = () => this.send(15);
         this.updateDisplay();
         
+        // 记录上次检查的日期，用于检测日期变化
+        this.lastCheckedDate = this.getLocalDateString();
+        
         // 监听语言变化
         window.addEventListener('languageChanged', () => {
             this.updateUI();
         });
+        
+        // 监听送花模态框打开事件，打开时重新加载数据
+        const flowersModal = document.getElementById('flowersModal');
+        if (flowersModal) {
+            // 使用 MutationObserver 监听模态框的 class 变化
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                        if (flowersModal.classList.contains('active')) {
+                            // 模态框已打开，检查并重新加载数据
+                            this.checkAndReloadIfNewDay();
+                        }
+                    }
+                });
+            });
+            observer.observe(flowersModal, { attributes: true });
+        }
+        
+        // 监听页面可见性变化，当页面重新可见时检查日期
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                this.checkAndReloadIfNewDay();
+            }
+        });
+        
+        // 监听窗口焦点变化
+        window.addEventListener('focus', () => {
+            this.checkAndReloadIfNewDay();
+        });
+        
+        // 每分钟检查一次日期是否变化（防止页面长时间打开）
+        setInterval(() => {
+            this.checkAndReloadIfNewDay();
+        }, 60000); // 60秒检查一次
+    }
+    
+    // 检查日期是否变化，如果变化则重新加载数据
+    async checkAndReloadIfNewDay() {
+        const currentDate = this.getLocalDateString();
+        if (currentDate !== this.lastCheckedDate) {
+            // 日期已变化，重新加载今日数据
+            this.lastCheckedDate = currentDate;
+            await this.loadToday();
+            this.updateDisplay();
+        }
     }
     
     // 获取本地时区的日期字符串（YYYY-MM-DD格式）

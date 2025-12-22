@@ -1422,6 +1422,42 @@ class AdminManager {
         if (this.panelModal && this.isLoggedIn) {
             this.panelModal.classList.add('active');
             this.renderAdminMessages();
+            
+            // 初始化标签页切换
+            this.initAdminTabs();
+        }
+    }
+    
+    initAdminTabs() {
+        const tabMessages = document.getElementById('adminTabMessages');
+        const tabFlowers = document.getElementById('adminTabFlowers');
+        const contentMessages = document.getElementById('adminTabContentMessages');
+        const contentFlowers = document.getElementById('adminTabContentFlowers');
+        
+        if (tabMessages && tabFlowers) {
+            tabMessages.addEventListener('click', () => {
+                tabMessages.classList.add('active');
+                tabFlowers.classList.remove('active');
+                contentMessages.classList.add('active');
+                contentFlowers.classList.remove('active');
+                this.renderAdminMessages();
+            });
+            
+            tabFlowers.addEventListener('click', () => {
+                tabFlowers.classList.add('active');
+                tabMessages.classList.remove('active');
+                contentFlowers.classList.add('active');
+                contentMessages.classList.remove('active');
+                this.renderAdminFlowers();
+            });
+        }
+        
+        // 刷新按钮
+        const refreshBtn = document.getElementById('adminFlowerRefreshBtn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => {
+                this.renderAdminFlowers();
+            });
         }
     }
     
@@ -1516,6 +1552,108 @@ class AdminManager {
         const hours = String(date.getHours()).padStart(2, '0');
         const minutes = String(date.getMinutes()).padStart(2, '0');
         return `${year}/${month}/${day} ${hours}:${minutes}`;
+    }
+    
+    async renderAdminFlowers() {
+        if (!this.isLoggedIn || !this.adminToken) {
+            return;
+        }
+        
+        try {
+            const apiEndpoint = this.getApiEndpoint();
+            
+            // 获取筛选条件
+            const dateFilter = document.getElementById('adminFlowerDateFilter')?.value || '';
+            const ipFilter = document.getElementById('adminFlowerIpFilter')?.value || '';
+            
+            // 构建查询参数
+            const params = new URLSearchParams();
+            if (dateFilter) params.append('date', dateFilter);
+            if (ipFilter) params.append('user_ip', ipFilter);
+            params.append('limit', '500');
+            
+            const response = await fetch(`${apiEndpoint}/flowers/records?${params.toString()}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.adminToken}`
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error(result.error || '获取送花记录失败');
+            }
+            
+            const records = result.records || [];
+            const stats = result.stats || [];
+            const listEl = document.getElementById('adminFlowersList');
+            const countEl = document.getElementById('adminFlowerTotalCount');
+            
+            if (countEl) {
+                countEl.textContent = records.length;
+            }
+            
+            if (listEl) {
+                if (records.length === 0) {
+                    listEl.innerHTML = '<p class="admin-empty">暂无送花记录</p>';
+                    return;
+                }
+                
+                // 显示统计信息
+                let html = '<div class="admin-flowers-stats">';
+                html += '<h3>按日期和IP统计</h3>';
+                html += '<div class="admin-flowers-stats-list">';
+                
+                stats.forEach(stat => {
+                    html += `
+                        <div class="admin-flower-stat-item">
+                            <div class="stat-header">
+                                <span class="stat-date">日期：${stat.date}</span>
+                                <span class="stat-ip">IP：${stat.user_ip}</span>
+                                <span class="stat-total">总计：${stat.total_count} 朵</span>
+                            </div>
+                            <div class="stat-records">
+                                ${stat.records.map(r => `
+                                    <div class="stat-record">
+                                        <span>${r.flower_count} 朵</span>
+                                        <span class="stat-time">${this.formatDateTime(new Date(r.created_at).getTime())}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div></div>';
+                
+                // 显示详细记录
+                html += '<h3>详细记录</h3>';
+                html += '<div class="admin-flowers-records-list">';
+                html += records.map(record => {
+                    const createdTime = record.created_at ? this.formatDateTime(new Date(record.created_at).getTime()) : '未知时间';
+                    return `
+                        <div class="admin-flower-record-item">
+                            <div class="record-info">
+                                <span class="record-date">日期：${record.date}</span>
+                                <span class="record-ip">IP：${record.user_ip}</span>
+                                <span class="record-count">数量：${record.flower_count} 朵</span>
+                                <span class="record-time">时间：${createdTime}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                html += '</div>';
+                
+                listEl.innerHTML = html;
+            }
+        } catch (error) {
+            console.error('获取送花记录失败:', error);
+            const listEl = document.getElementById('adminFlowersList');
+            if (listEl) {
+                listEl.innerHTML = '<p class="admin-error">获取送花记录失败，请刷新重试</p>';
+            }
+        }
     }
     
     async approveMessage(id) {

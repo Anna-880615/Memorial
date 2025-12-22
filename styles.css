@@ -542,6 +542,102 @@ body {
 .admin-messages-list::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 3px; }
 .admin-messages-list::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.3); }
 
+/* 管理员标签页 */
+.admin-tabs {
+    display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid #e5e5e7;
+}
+.admin-tab {
+    padding: 12px 24px; border: none; background: transparent;
+    color: #86868b; font-size: 15px; font-weight: 500; cursor: pointer;
+    border-bottom: 2px solid transparent; margin-bottom: -2px; transition: var(--transition);
+}
+.admin-tab:hover { color: #1d1d1f; }
+.admin-tab.active {
+    color: var(--apple-blue); border-bottom-color: var(--apple-blue);
+}
+.admin-tab-content {
+    display: none;
+}
+.admin-tab-content.active {
+    display: block;
+}
+
+/* 送花记录样式 */
+.admin-filter {
+    display: flex; gap: 8px; align-items: center; margin-top: 12px;
+}
+.admin-filter input {
+    padding: 8px 12px; border: 1px solid #d2d2d7; border-radius: 8px;
+    font-size: 14px; outline: none; transition: var(--transition);
+}
+.admin-filter input:focus {
+    border-color: var(--apple-blue); box-shadow: 0 0 0 3px rgba(0,113,227,0.1);
+}
+.admin-filter input[type="date"] {
+    min-width: 150px;
+}
+.admin-filter input[type="text"] {
+    flex: 1; min-width: 200px;
+}
+.admin-flowers-list {
+    max-height: 60vh; overflow-y: auto; margin-top: 20px;
+}
+.admin-flowers-stats {
+    margin-bottom: 30px;
+}
+.admin-flowers-stats h3 {
+    font-size: 18px; margin-bottom: 16px; color: #1d1d1f;
+}
+.admin-flowers-stats-list {
+    display: flex; flex-direction: column; gap: 16px;
+}
+.admin-flower-stat-item {
+    background: #f5f5f7; border-radius: 12px; padding: 16px;
+    border-left: 4px solid var(--apple-blue);
+}
+.stat-header {
+    display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 12px;
+    font-weight: 500; font-size: 14px;
+}
+.stat-date, .stat-ip, .stat-total {
+    color: #1d1d1f;
+}
+.stat-total {
+    color: var(--apple-blue); font-weight: 600;
+}
+.stat-records {
+    display: flex; flex-direction: column; gap: 8px; margin-top: 12px;
+    padding-top: 12px; border-top: 1px solid #d2d2d7;
+}
+.stat-record {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 12px; background: #fff; border-radius: 6px;
+    font-size: 13px;
+}
+.stat-time {
+    color: #86868b;
+}
+.admin-flowers-records-list {
+    display: flex; flex-direction: column; gap: 12px;
+}
+.admin-flower-record-item {
+    background: #f5f5f7; border-radius: 8px; padding: 12px 16px;
+    border-left: 3px solid #d2d2d7;
+}
+.record-info {
+    display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px;
+}
+.record-date, .record-ip, .record-count, .record-time {
+    color: #1d1d1f;
+}
+.record-count {
+    color: var(--apple-blue); font-weight: 500;
+}
+.admin-flowers-list::-webkit-scrollbar { width: 6px; }
+.admin-flowers-list::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 3px; }
+.admin-flowers-list::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 3px; }
+.admin-flowers-list::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.3); }
+
 /* 响应式 - 移动端优化 */
 @media (max-width: 768px) {
     /* 导航栏 - 汉堡菜单 */

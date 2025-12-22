@@ -302,14 +302,35 @@
         <div class="modal-content modal-large">
             <button class="modal-close" id="closeAdminPanel">&times;</button>
             <div class="modal-body">
-                <h2 class="modal-title">留言管理</h2>
+                <h2 class="modal-title">管理后台</h2>
+                <div class="admin-tabs">
+                    <button class="admin-tab active" id="adminTabMessages" data-tab="messages">留言管理</button>
+                    <button class="admin-tab" id="adminTabFlowers" data-tab="flowers">送花记录</button>
+                </div>
                 <div class="admin-panel">
-                    <div class="admin-stats">
-                        <p>总留言数：<span id="adminTotalCount">0</span></p>
-                        <button id="adminLogoutBtn" class="admin-btn-secondary">退出登录</button>
+                    <!-- 留言管理面板 -->
+                    <div class="admin-tab-content active" id="adminTabContentMessages">
+                        <div class="admin-stats">
+                            <p>总留言数：<span id="adminTotalCount">0</span></p>
+                            <button id="adminLogoutBtn" class="admin-btn-secondary">退出登录</button>
+                        </div>
+                        <div class="admin-messages-list" id="adminMessagesList">
+                            <!-- 留言列表将在这里动态生成 -->
+                        </div>
                     </div>
-                    <div class="admin-messages-list" id="adminMessagesList">
-                        <!-- 留言列表将在这里动态生成 -->
+                    <!-- 送花记录面板 -->
+                    <div class="admin-tab-content" id="adminTabContentFlowers">
+                        <div class="admin-stats">
+                            <p>总记录数：<span id="adminFlowerTotalCount">0</span></p>
+                            <div class="admin-filter">
+                                <input type="date" id="adminFlowerDateFilter" placeholder="按日期筛选">
+                                <input type="text" id="adminFlowerIpFilter" placeholder="按IP筛选">
+                                <button id="adminFlowerRefreshBtn" class="admin-btn-secondary">刷新</button>
+                            </div>
+                        </div>
+                        <div class="admin-flowers-list" id="adminFlowersList">
+                            <!-- 送花记录列表将在这里动态生成 -->
+                        </div>
                     </div>
                 </div>
             </div>

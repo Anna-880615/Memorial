@@ -648,36 +648,45 @@ class FlowerSection {
             
             const result = await response.json();
             
-            if (result.success) {
-                this.count = result.todayCount;
-                this.total = result.total;
-                this.createHearts(num);
-                this.updateDisplay();
-            } else {
-                // 使用语言系统的错误提示
-                // 如果 API 返回的错误信息包含特定关键词，使用对应的翻译
+            // 检查 HTTP 状态码和响应结果
+            if (!response.ok || !result.success) {
+                // 处理错误情况
                 let errorMsg;
-                if (languageManager) {
-                    if (result.message && result.message.includes('最多只能送')) {
-                        // API 返回了限制错误，使用限制提示
-                        const match = result.message.match(/(\d+)/g);
-                        if (match && match.length >= 2) {
-                            const max = match[0];
-                            const remaining = match[1];
-                            errorMsg = languageManager.t('flower.limit.reached')
-                                .replace('{max}', max)
-                                .replace('{remaining}', remaining);
+                if (result.message) {
+                    // API 返回了错误消息
+                    if (languageManager) {
+                        if (result.message.includes('最多只能送')) {
+                            // API 返回了限制错误，使用限制提示
+                            const match = result.message.match(/(\d+)/g);
+                            if (match && match.length >= 2) {
+                                const max = match[0];
+                                const remaining = match[1];
+                                errorMsg = languageManager.t('flower.limit.reached')
+                                    .replace('{max}', max)
+                                    .replace('{remaining}', remaining);
+                            } else {
+                                errorMsg = languageManager.t('flower.error.failed');
+                            }
                         } else {
-                            errorMsg = languageManager.t('flower.error.failed');
+                            errorMsg = result.message; // 直接显示服务器返回的消息
                         }
                     } else {
-                        errorMsg = languageManager.t('flower.error.failed');
+                        errorMsg = result.message;
                     }
                 } else {
-                    errorMsg = result.message || '送花失败，请稍后重试';
+                    errorMsg = languageManager 
+                        ? languageManager.t('flower.error.failed')
+                        : '送花失败，请稍后重试';
                 }
                 alert(errorMsg);
+                return;
             }
+            
+            // 成功情况
+            this.count = result.todayCount;
+            this.total = result.total;
+            this.createHearts(num);
+            this.updateDisplay();
         } catch (error) {
             console.error('送花失败:', error);
             // 使用语言系统的错误提示

@@ -18,7 +18,20 @@ export default async function handler(req, res) {
   }
 
   const supabase = createClient(supabaseUrl, supabaseKey);
-  const userIp = req.headers['x-forwarded-for'] || req.connection?.remoteAddress || 'unknown';
+  
+  // 获取用户 IP 地址（处理 Vercel 等 serverless 环境）
+  let userIp = 'unknown';
+  if (req.headers['x-forwarded-for']) {
+    // x-forwarded-for 可能包含多个 IP（代理链），取第一个
+    userIp = req.headers['x-forwarded-for'].split(',')[0].trim();
+  } else if (req.headers['x-real-ip']) {
+    userIp = req.headers['x-real-ip'];
+  } else if (req.connection?.remoteAddress) {
+    userIp = req.connection.remoteAddress;
+  } else if (req.socket?.remoteAddress) {
+    userIp = req.socket.remoteAddress;
+  }
+  
   const today = new Date().toISOString().split('T')[0];
 
   try {

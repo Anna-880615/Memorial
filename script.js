@@ -1554,6 +1554,22 @@ class AdminManager {
         return `${year}/${month}/${day} ${hours}:${minutes}`;
     }
     
+    // 格式化送花记录的时间（使用date字段的日期，created_at的时间）
+    formatFlowerRecordTime(createdAt, dateField) {
+        if (!createdAt) return '未知时间';
+        
+        // 从 created_at 提取时间部分（转换为本地时区）
+        const date = new Date(createdAt);
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        
+        // 使用 date 字段的日期（这是前端计算的本地日期）
+        // 格式：YYYY-MM-DD -> YYYY/MM/DD
+        const dateStr = dateField.replace(/-/g, '/');
+        
+        return `${dateStr} ${hours}:${minutes}`;
+    }
+    
     async renderAdminFlowers() {
         if (!this.isLoggedIn || !this.adminToken) {
             return;
@@ -1617,7 +1633,7 @@ class AdminManager {
                                 ${stat.records.map(r => `
                                     <div class="stat-record">
                                         <span>${r.flower_count} 朵</span>
-                                        <span class="stat-time">${this.formatDateTime(new Date(r.created_at).getTime())}</span>
+                                        <span class="stat-time">${this.formatFlowerRecordTime(r.created_at, stat.date)}</span>
                                     </div>
                                 `).join('')}
                             </div>
@@ -1631,7 +1647,7 @@ class AdminManager {
                 html += '<h3>详细记录</h3>';
                 html += '<div class="admin-flowers-records-list">';
                 html += records.map(record => {
-                    const createdTime = record.created_at ? this.formatDateTime(new Date(record.created_at).getTime()) : '未知时间';
+                    const createdTime = this.formatFlowerRecordTime(record.created_at, record.date);
                     return `
                         <div class="admin-flower-record-item">
                             <div class="record-info">

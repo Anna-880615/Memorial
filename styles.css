@@ -436,17 +436,6 @@ body {
     font-size: 14px; cursor: pointer; transition: var(--transition);
 }
 .admin-btn-secondary:hover { background: rgba(0,0,0,0.15); }
-.admin-btn-fix {
-    padding: 8px 16px; background: #ff9800; color: #fff;
-    border: none; border-radius: 6px; font-size: 13px; cursor: pointer; transition: var(--transition);
-    font-weight: 500;
-}
-.admin-btn-fix:hover:not(:disabled) {
-    background: #f57c00; transform: scale(1.05);
-}
-.admin-btn-fix:disabled {
-    background: #ccc; cursor: not-allowed; opacity: 0.6;
-}
 .admin-error {
     color: #d32f2f; font-size: 14px; margin-top: -8px;
     display: none;

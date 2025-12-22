@@ -14,8 +14,13 @@
                 <span class="logo-text">于朦胧</span>
                 <span class="logo-text-en">Alan Yu</span>
             </div>
-            <div class="nav-right">
-                <ul class="nav-menu">
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="菜单">
+                <span class="menu-line"></span>
+                <span class="menu-line"></span>
+                <span class="menu-line"></span>
+            </button>
+            <div class="nav-right" id="navRight">
+                <ul class="nav-menu" id="navMenu">
                     <li><button class="nav-item" id="navAbout" data-i18n="nav.about">关于</button></li>
                     <li><button class="nav-item" id="navMusic" data-i18n="nav.music">音乐</button></li>
                     <li><button class="nav-item" id="navMV" data-i18n="nav.mv">MV</button></li>
@@ -182,9 +187,16 @@
                     </div>
                     
                     <div class="music-controls-vinyl">
-                        <button id="prevSongBtn" class="control-btn-vinyl" data-i18n-title="music.prev">‹</button>
-                        <button id="playPauseBtn" class="control-btn-vinyl play-pause-btn-vinyl" data-i18n-title="music.play">▶</button>
-                        <button id="nextSongBtn" class="control-btn-vinyl" data-i18n-title="music.next">›</button>
+                        <button id="prevSongBtn" class="control-btn-vinyl prev-btn" data-i18n-title="music.prev"></button>
+                        <button id="playPauseBtn" class="control-btn-vinyl play-pause-btn-vinyl" data-i18n-title="music.play">
+                            <svg class="play-icon" viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+                                <path d="M8 5v14l11-7z"/>
+                            </svg>
+                            <svg class="pause-icon" viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+                                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                            </svg>
+                        </button>
+                        <button id="nextSongBtn" class="control-btn-vinyl next-btn" data-i18n-title="music.next"></button>
                     </div>
                     
                     <div class="progress-container">

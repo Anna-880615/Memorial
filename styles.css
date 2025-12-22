@@ -45,6 +45,37 @@ body {
 }
 .nav-item:hover { background: rgba(0,0,0,0.05); }
 
+/* 移动端汉堡菜单按钮 */
+.mobile-menu-btn {
+    display: none;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 28px;
+    height: 24px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 1001;
+}
+.menu-line {
+    width: 100%;
+    height: 2px;
+    background-color: var(--primary-color);
+    border-radius: 2px;
+    transition: var(--transition);
+    transform-origin: center;
+}
+.mobile-menu-btn.active .menu-line:nth-child(1) {
+    transform: rotate(45deg) translate(6px, 6px);
+}
+.mobile-menu-btn.active .menu-line:nth-child(2) {
+    opacity: 0;
+}
+.mobile-menu-btn.active .menu-line:nth-child(3) {
+    transform: rotate(-45deg) translate(6px, -6px);
+}
+
 /* 语言切换 */
 .language-switcher { display: flex; gap: 6px; margin-left: 16px; padding-left: 16px; border-left: 1px solid rgba(0,0,0,0.1); }
 .lang-btn {
@@ -58,9 +89,30 @@ body {
 /* 主界面 Hero */
 .main-hero { position: relative; width: 100vw; height: 100vh; }
 .carousel-container { position: absolute; inset: 0; width: 100%; height: 100%; }
-.carousel-wrapper { display: flex; width: 100%; height: 100%; transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
-.carousel-slide { min-width: 100%; height: 100%; position: relative; }
-.carousel-slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.carousel-wrapper { 
+    display: flex; 
+    width: 100%; 
+    height: 100%; 
+    transition: transform 0.5s ease-in-out;
+    will-change: transform;
+}
+.carousel-slide { 
+    min-width: 100%; 
+    width: 100%;
+    flex-shrink: 0;
+    height: 100%; 
+    position: relative;
+    overflow: hidden;
+}
+.carousel-slide img { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; 
+    display: block;
+    pointer-events: none;
+    -webkit-user-drag: none;
+    user-select: none;
+}
 
 .hero-overlay {
     position: absolute; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center; pointer-events: none;
@@ -228,8 +280,48 @@ body {
 .control-btn-vinyl {
     width: 50px; height: 50px; border-radius: 50%; border: none; background: var(--primary-color);
     color: #fff; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    position: relative;
+    -webkit-appearance: none;
+    appearance: none;
 }
 .play-pause-btn-vinyl { width: 64px; height: 64px; font-size: 30px; }
+
+/* 自定义播放/暂停图标 */
+.play-pause-btn-vinyl .play-icon,
+.play-pause-btn-vinyl .pause-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.play-pause-btn-vinyl .play-icon {
+    display: block;
+    margin-left: 2px; /* 视觉居中调整 */
+}
+.play-pause-btn-vinyl .pause-icon {
+    display: none;
+}
+.play-pause-btn-vinyl.playing .play-icon { display: none; }
+.play-pause-btn-vinyl.playing .pause-icon { display: block; }
+
+/* 上一首/下一首按钮样式 */
+.control-btn-vinyl.prev-btn::before,
+.control-btn-vinyl.next-btn::before {
+    content: '';
+    width: 0;
+    height: 0;
+    border-style: solid;
+}
+.control-btn-vinyl.prev-btn::before {
+    border-width: 10px 14px 10px 0;
+    border-color: transparent #fff transparent transparent;
+    margin-right: 3px;
+}
+.control-btn-vinyl.next-btn::before {
+    border-width: 10px 0 10px 14px;
+    border-color: transparent transparent transparent #fff;
+    margin-left: 3px;
+}
 .progress-container { width: 100%; padding: 16px 0; }
 .progress-bar-wrapper { position: relative; width: 100%; cursor: pointer; }
 .progress-bar {
@@ -443,29 +535,107 @@ body {
 
 /* 响应式 - 移动端优化 */
 @media (max-width: 768px) {
-    /* 导航栏 */
+    /* 导航栏 - 汉堡菜单 */
     .nav-container { 
         padding: 12px 16px; 
-        flex-wrap: wrap;
+        position: relative;
     }
     .nav-logo .logo-text { font-size: 16px; }
     .nav-logo .logo-text-en { font-size: 11px; }
-    .nav-menu { 
-        flex-wrap: wrap; 
-        gap: 4px; 
-        justify-content: center;
+    
+    /* 显示汉堡菜单按钮 */
+    .mobile-menu-btn {
+        display: flex;
     }
+    
+    /* 移动端导航菜单 - 从右侧滑入 */
+    .nav-right {
+        position: fixed;
+        top: 0;
+        right: -280px;
+        width: 280px;
+        height: 100vh;
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        flex-direction: column;
+        align-items: stretch;
+        padding: 80px 24px 40px;
+        box-shadow: -4px 0 20px rgba(0,0,0,0.1);
+        transition: right 0.3s ease;
+        z-index: 999;
+        overflow-y: auto;
+    }
+    
+    .nav-right.mobile-open {
+        right: 0;
+    }
+    
+    .nav-menu {
+        flex-direction: column;
+        width: 100%;
+        gap: 0;
+        margin-bottom: 24px;
+    }
+    
+    .nav-menu li {
+        width: 100%;
+        border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    
     .nav-item {
-        padding: 8px 12px;
-        font-size: 13px;
+        width: 100%;
+        padding: 16px 0;
+        font-size: 17px;
+        text-align: left;
+        justify-content: flex-start;
+        border-radius: 0;
     }
+    
+    .nav-item:hover {
+        background: transparent;
+        color: var(--apple-blue);
+    }
+    
     .language-switcher {
-        margin-left: 8px;
-        padding-left: 8px;
+        margin-left: 0;
+        padding-left: 0;
+        border-left: none;
+        border-top: 1px solid rgba(0,0,0,0.06);
+        padding-top: 20px;
+        width: 100%;
+        justify-content: center;
+        gap: 12px;
     }
+    
     .lang-btn {
-        padding: 6px 10px;
-        font-size: 12px;
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+    
+    /* 遮罩层 */
+    .mobile-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.4);
+        z-index: 998;
+    }
+    
+    .mobile-overlay.active {
+        display: block;
+    }
+    
+    /* 轮播图触摸优化 */
+    .carousel-container {
+        touch-action: pan-y pinch-zoom;
+    }
+    
+    .carousel-wrapper {
+        touch-action: pan-x;
     }
     
     /* 主界面 */
@@ -520,10 +690,21 @@ body {
         height: 44px;
         font-size: 20px;
     }
+    .control-btn-vinyl.prev-btn::before {
+        border-width: 8px 11px 8px 0;
+    }
+    .control-btn-vinyl.next-btn::before {
+        border-width: 8px 0 8px 11px;
+    }
     .play-pause-btn-vinyl {
         width: 56px;
         height: 56px;
         font-size: 26px;
+    }
+    .play-pause-btn-vinyl .play-icon,
+    .play-pause-btn-vinyl .pause-icon {
+        width: 24px;
+        height: 24px;
     }
     
     /* 模态框 */

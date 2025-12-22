@@ -104,15 +104,52 @@ let languageManager;
 class NavbarAutoHide {
     constructor() {
         this.navbar = document.querySelector('.top-nav');
+        this.isMobile = window.innerWidth <= 768;
         this.init();
     }
     init() {
+        // 桌面端：鼠标移动到顶部显示
         document.addEventListener('mousemove', (e) => {
+            if (this.isMobile) return;
             if (e.clientY <= 80 || (this.navbar && this.navbar.contains(e.target))) {
                 this.navbar.classList.add('visible');
             } else {
                 this.navbar.classList.remove('visible');
             }
+        });
+        
+        // 移动端：触摸顶部区域或点击时显示
+        let touchStartY = 0;
+        document.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+            // 触摸顶部80px区域时显示导航栏
+            if (touchStartY <= 80) {
+                this.navbar.classList.add('visible');
+            }
+        }, { passive: true });
+        
+        document.addEventListener('touchmove', (e) => {
+            const touchCurrentY = e.touches[0].clientY;
+            // 向下滑动时隐藏导航栏（除非在导航栏内）
+            if (touchCurrentY > touchStartY + 50 && !this.navbar.contains(e.target)) {
+                this.navbar.classList.remove('visible');
+            }
+            // 向上滑动到顶部时显示导航栏
+            if (touchCurrentY <= 80) {
+                this.navbar.classList.add('visible');
+            }
+        }, { passive: true });
+        
+        // 滚动到顶部时始终显示导航栏
+        window.addEventListener('scroll', () => {
+            if (window.scrollY <= 50) {
+                this.navbar.classList.add('visible');
+            }
+        }, { passive: true });
+        
+        // 窗口大小改变时更新移动端状态
+        window.addEventListener('resize', () => {
+            this.isMobile = window.innerWidth <= 768;
         });
     }
 }
@@ -121,6 +158,54 @@ class NavbarAutoHide {
 class ModalManager {
     constructor() {
         this.init();
+        this.initMobileMenu();
+    }
+    
+    initMobileMenu() {
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navRight = document.getElementById('navRight');
+        const navMenu = document.getElementById('navMenu');
+        
+        if (!mobileMenuBtn || !navRight) return;
+        
+        // 创建遮罩层
+        const overlay = document.createElement('div');
+        overlay.className = 'mobile-overlay';
+        overlay.id = 'mobileOverlay';
+        document.body.appendChild(overlay);
+        
+        // 汉堡菜单点击
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenuBtn.classList.toggle('active');
+            navRight.classList.toggle('mobile-open');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = navRight.classList.contains('mobile-open') ? 'hidden' : '';
+        });
+        
+        // 遮罩层点击关闭
+        overlay.addEventListener('click', () => {
+            this.closeMobileMenu();
+        });
+        
+        // 菜单项点击后关闭菜单
+        if (navMenu) {
+            navMenu.addEventListener('click', (e) => {
+                if (e.target.classList.contains('nav-item')) {
+                    this.closeMobileMenu();
+                }
+            });
+        }
+    }
+    
+    closeMobileMenu() {
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navRight = document.getElementById('navRight');
+        const overlay = document.getElementById('mobileOverlay');
+        
+        if (mobileMenuBtn) mobileMenuBtn.classList.remove('active');
+        if (navRight) navRight.classList.remove('mobile-open');
+        if (overlay) overlay.classList.remove('active');
+        document.body.style.overflow = '';
     }
     
     init() {
@@ -158,6 +243,7 @@ class ModalManager {
     }
 
     openModal(modal) {
+        this.closeMobileMenu(); // 打开模态框时关闭移动菜单
         modal.style.display = 'flex';
         setTimeout(() => modal.classList.add('active'), 10);
         document.body.style.overflow = 'hidden';
@@ -181,6 +267,12 @@ class ImageCarousel {
         this.currentIndex = 1;
         this.slideCount = this.slides.length;
         this.isTransitioning = false;
+        // 触摸滑动相关
+        this.touchStartX = 0;
+        this.touchStartY = 0;
+        this.touchCurrentX = 0;
+        this.isDragging = false;
+        this.threshold = 50; // 滑动阈值
         this.init();
     }
     init() {
@@ -191,7 +283,60 @@ class ImageCarousel {
         this.prevBtn.addEventListener('click', () => this.move(-1));
         this.nextBtn.addEventListener('click', () => this.move(1));
         this.wrapper.addEventListener('transitionend', () => this.checkReset());
-        setInterval(() => { if(!this.isTransitioning) this.move(1); }, 5000);
+        // 触摸事件
+        this.setupTouchEvents();
+        // 自动播放
+        this.autoPlayTimer = setInterval(() => { if(!this.isTransitioning && !this.isDragging) this.move(1); }, 5000);
+    }
+    
+    setupTouchEvents() {
+        this.wrapper.addEventListener('touchstart', (e) => {
+            if (this.isTransitioning) return;
+            this.touchStartX = e.touches[0].clientX;
+            this.touchStartY = e.touches[0].clientY;
+            this.touchCurrentX = this.touchStartX;
+            this.isDragging = true;
+            this.wrapper.style.transition = 'none';
+        }, { passive: true });
+        
+        this.wrapper.addEventListener('touchmove', (e) => {
+            if (!this.isDragging || this.isTransitioning) return;
+            
+            this.touchCurrentX = e.touches[0].clientX;
+            const deltaX = this.touchCurrentX - this.touchStartX;
+            const deltaY = e.touches[0].clientY - this.touchStartY;
+            
+            // 水平滑动时阻止垂直滚动
+            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
+                e.preventDefault();
+                const currentOffset = -this.currentIndex * 100;
+                const movePercent = (deltaX / window.innerWidth) * 100;
+                this.wrapper.style.transform = `translateX(${currentOffset + movePercent}%)`;
+            }
+        }, { passive: false });
+        
+        this.wrapper.addEventListener('touchend', (e) => {
+            if (!this.isDragging) return;
+            this.isDragging = false;
+            
+            const deltaX = this.touchCurrentX - this.touchStartX;
+            
+            if (Math.abs(deltaX) > this.threshold) {
+                if (deltaX > 0) {
+                    this.move(-1); // 向右滑动，上一张
+                } else {
+                    this.move(1);  // 向左滑动，下一张
+                }
+            } else {
+                // 没有超过阈值，恢复原位
+                this.updatePosition(true);
+            }
+        }, { passive: true });
+        
+        this.wrapper.addEventListener('touchcancel', () => {
+            this.isDragging = false;
+            this.updatePosition(true);
+        }, { passive: true });
     }
     cloneSlides() {
         const first = this.slides[0].cloneNode(true);
@@ -832,9 +977,14 @@ class MusicPlayer {
     }
     
     updateState() {
-        this.playBtn.textContent = this.isPlaying ? '⏸' : '▶';
-        if(this.isPlaying) this.disc.classList.add('playing');
-        else this.disc.classList.remove('playing');
+        // 使用CSS类切换图标显示
+        if(this.isPlaying) {
+            this.playBtn.classList.add('playing');
+            this.disc.classList.add('playing');
+        } else {
+            this.playBtn.classList.remove('playing');
+            this.disc.classList.remove('playing');
+        }
     }
     
     skip(dir) {

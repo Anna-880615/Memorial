@@ -761,14 +761,18 @@ class FlowerSection {
         
         try {
             const apiEndpoint = typeof CONFIG !== 'undefined' ? CONFIG.API_ENDPOINT : '/api';
+            // 计算时区偏移（分钟）
+            const timezoneOffset = -new Date().getTimezoneOffset();
+            
             const response = await fetch(`${apiEndpoint}/flowers`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-Timezone-Offset': timezoneOffset.toString() // 传递时区偏移
                 },
                 body: JSON.stringify({
                     count: num,
-                    date: this.getLocalDateString() // 使用本地时区的日期
+                    date: this.getLocalDateString() // 保留作为后备
                 })
             });
             

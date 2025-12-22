@@ -631,11 +631,11 @@ body {
     
     /* 轮播图触摸优化 */
     .carousel-container {
-        touch-action: pan-y pinch-zoom;
+        touch-action: pan-y pinch-zoom; /* 允许垂直滚动和缩放 */
     }
     
     .carousel-wrapper {
-        touch-action: pan-x;
+        touch-action: pan-x pan-y; /* 允许水平和垂直滑动，JavaScript 会处理水平滑动逻辑 */
     }
     
     /* 主界面 */

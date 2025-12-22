@@ -290,12 +290,15 @@ class ImageCarousel {
     }
     
     setupTouchEvents() {
+        let touchDirection = null; // 'horizontal' 或 'vertical'，null 表示未确定
+        
         this.wrapper.addEventListener('touchstart', (e) => {
             if (this.isTransitioning) return;
             this.touchStartX = e.touches[0].clientX;
             this.touchStartY = e.touches[0].clientY;
             this.touchCurrentX = this.touchStartX;
             this.isDragging = true;
+            touchDirection = null; // 重置方向
             this.wrapper.style.transition = 'none';
         }, { passive: true });
         
@@ -303,11 +306,32 @@ class ImageCarousel {
             if (!this.isDragging || this.isTransitioning) return;
             
             this.touchCurrentX = e.touches[0].clientX;
+            const currentY = e.touches[0].clientY;
             const deltaX = this.touchCurrentX - this.touchStartX;
-            const deltaY = e.touches[0].clientY - this.touchStartY;
+            const deltaY = currentY - this.touchStartY;
+            const absDeltaX = Math.abs(deltaX);
+            const absDeltaY = Math.abs(deltaY);
             
-            // 水平滑动时阻止垂直滚动
-            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
+            // 如果方向还未确定，先判断滑动方向
+            if (touchDirection === null) {
+                // 需要移动超过一定距离才能确定方向（避免误判）
+                const minDistance = 15;
+                if (absDeltaX > minDistance || absDeltaY > minDistance) {
+                    // 水平滑动明显大于垂直滑动（至少是2倍），才认为是水平滑动
+                    if (absDeltaX > absDeltaY * 2) {
+                        touchDirection = 'horizontal';
+                    } else if (absDeltaY > absDeltaX * 2) {
+                        touchDirection = 'vertical';
+                        // 如果是垂直滑动，立即停止处理，让页面正常滚动
+                        this.isDragging = false;
+                        this.updatePosition(true);
+                        return;
+                    }
+                }
+            }
+            
+            // 只有在明确是水平滑动时才阻止默认行为并处理轮播
+            if (touchDirection === 'horizontal' && absDeltaX > 10) {
                 e.preventDefault();
                 const currentOffset = -this.currentIndex * 100;
                 const movePercent = (deltaX / window.innerWidth) * 100;
@@ -317,24 +341,35 @@ class ImageCarousel {
         
         this.wrapper.addEventListener('touchend', (e) => {
             if (!this.isDragging) return;
+            
+            const wasHorizontal = touchDirection === 'horizontal';
             this.isDragging = false;
             
-            const deltaX = this.touchCurrentX - this.touchStartX;
-            
-            if (Math.abs(deltaX) > this.threshold) {
-                if (deltaX > 0) {
-                    this.move(-1); // 向右滑动，上一张
+            // 只有在水平滑动时才处理切换
+            if (wasHorizontal) {
+                const deltaX = this.touchCurrentX - this.touchStartX;
+                
+                if (Math.abs(deltaX) > this.threshold) {
+                    if (deltaX > 0) {
+                        this.move(-1); // 向右滑动，上一张
+                    } else {
+                        this.move(1);  // 向左滑动，下一张
+                    }
                 } else {
-                    this.move(1);  // 向左滑动，下一张
+                    // 没有超过阈值，恢复原位
+                    this.updatePosition(true);
                 }
             } else {
-                // 没有超过阈值，恢复原位
+                // 垂直滑动或未确定方向，恢复原位
                 this.updatePosition(true);
             }
+            
+            touchDirection = null; // 重置方向
         }, { passive: true });
         
         this.wrapper.addEventListener('touchcancel', () => {
             this.isDragging = false;
+            touchDirection = null;
             this.updatePosition(true);
         }, { passive: true });
     }

@@ -154,12 +154,21 @@ body {
 .memorial-title { font-size: clamp(40px, 5vw, 56px); font-weight: 600; letter-spacing: -0.015em; margin-bottom: 20px; }
 .memorial-subtitle { font-size: 21px; color: #86868b; margin-bottom: 40px; }
 .message-input-container {
-    display: flex; gap: 12px; max-width: 600px; margin: 0 auto; padding: 10px;
+    display: flex; flex-direction: column; gap: 12px; max-width: 600px; margin: 0 auto; padding: 10px;
     background: var(--bg-gray); border-radius: 20px; transition: var(--transition);
 }
 .message-input-container textarea {
     flex: 1; border: none; background: transparent; padding: 12px 16px;
     font-size: 17px; font-family: inherit; resize: none; outline: none; color: #1d1d1f;
+}
+.message-input-footer {
+    display: flex; justify-content: space-between; align-items: center; padding: 0 4px;
+}
+.message-char-count {
+    font-size: 13px; color: #86868b; user-select: none;
+}
+.message-char-count.char-count-overflow {
+    color: #ff3b30; font-weight: 500;
 }
 .memorial-submit-btn {
     padding: 8px 24px; background-color: var(--apple-blue); color: #fff;

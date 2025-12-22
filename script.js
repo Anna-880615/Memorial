@@ -440,6 +440,12 @@ class MessageBoard {
         this.btn.addEventListener('click', () => this.submit());
         window.addEventListener('languageChanged', () => this.updateUI());
         
+        // 监听输入框变化，实时更新字符数
+        if (this.input) {
+            this.input.addEventListener('input', () => this.updateCharCount());
+            this.updateCharCount(); // 初始化字符数显示
+        }
+        
         // 监听滚动事件
         if (this.wrapper) {
             this.wrapper.addEventListener('scroll', () => {
@@ -451,6 +457,25 @@ class MessageBoard {
         window.addEventListener('resize', () => {
             this.updateFadeVisibility();
         });
+    }
+    
+    updateCharCount() {
+        const charCountEl = document.getElementById('messageCharCount');
+        if (!charCountEl || !this.input) return;
+        
+        // 按实际字符数计算（中英文都算1个字符）
+        const text = this.input.value;
+        const charCount = Array.from(text).length;
+        const maxChars = 1000;
+        
+        charCountEl.textContent = `${charCount} / ${maxChars}`;
+        
+        // 超过限制时显示警告样式
+        if (charCount > maxChars) {
+            charCountEl.classList.add('char-count-overflow');
+        } else {
+            charCountEl.classList.remove('char-count-overflow');
+        }
     }
     
     async loadMessages() {
@@ -472,6 +497,13 @@ class MessageBoard {
         if(!text) { 
             alert(languageManager ? languageManager.t('message.empty') : '请输入留言内容'); 
             return; 
+        }
+        
+        // 检查字符数限制（按实际字符数计算）
+        const charCount = Array.from(text).length;
+        if (charCount > 1000) {
+            alert(`留言内容过长（最多1000字，当前${charCount}字）`);
+            return;
         }
         
         // 禁用按钮防止重复提交

@@ -71,10 +71,12 @@ export default async function handler(req, res) {
         });
       }
 
-      if (text.length > 1000) {
+      // 按实际字符数计算（中英文都算1个字符，使用 Array.from 正确处理多字节字符）
+      const charCount = Array.from(text).length;
+      if (charCount > 1000) {
         return res.status(400).json({
           success: false,
-          error: '留言内容过长（最多1000字）'
+          error: `留言内容过长（最多1000字，当前${charCount}字）`
         });
       }
 

@@ -711,9 +711,13 @@ class FlowerSection {
     async loadToday() {
         try {
             const apiEndpoint = typeof CONFIG !== 'undefined' ? CONFIG.API_ENDPOINT : '/api';
-            // 传递本地时区的日期给后端
-            const localDate = this.getLocalDateString();
-            const response = await fetch(`${apiEndpoint}/flowers/today?date=${localDate}`);
+            // 传递时区偏移给后端，让后端基于本地时间计算日期
+            const timezoneOffset = -new Date().getTimezoneOffset();
+            const response = await fetch(`${apiEndpoint}/flowers/today?timezoneOffset=${timezoneOffset}`, {
+                headers: {
+                    'X-Timezone-Offset': timezoneOffset.toString()
+                }
+            });
             const data = await response.json();
             if (data.success) {
                 this.count = data.count || 0;
@@ -1463,6 +1467,14 @@ class AdminManager {
                 this.renderAdminFlowers();
             });
         }
+        
+        // 修复日期按钮
+        const fixDatesBtn = document.getElementById('adminFlowerFixDatesBtn');
+        if (fixDatesBtn) {
+            fixDatesBtn.addEventListener('click', () => {
+                this.fixFlowerDates();
+            });
+        }
     }
     
     closePanel() {
@@ -1572,6 +1584,51 @@ class AdminManager {
         
         // 显示真实的送花时间（不篡改）
         return `${year}/${month}/${day} ${hours}:${minutes}`;
+    }
+    
+    async fixFlowerDates() {
+        if (!this.isLoggedIn || !this.adminToken) {
+            alert('请先登录管理员账户');
+            return;
+        }
+        
+        if (!confirm('确定要修复所有送花记录的日期吗？\n\n这将基于 created_at 时间戳重新计算并更新 date 字段。\n此操作可能需要一些时间，请耐心等待。')) {
+            return;
+        }
+        
+        const fixBtn = document.getElementById('adminFlowerFixDatesBtn');
+        if (fixBtn) {
+            fixBtn.disabled = true;
+            fixBtn.textContent = '修复中...';
+        }
+        
+        try {
+            const apiEndpoint = this.getApiEndpoint();
+            const response = await fetch(`${apiEndpoint}/flowers/fix-dates`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${this.adminToken}`
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                alert(`修复完成！\n成功修复：${result.fixedCount} 条记录\n失败：${result.errorCount} 条记录\n总计：${result.totalRecords} 条记录`);
+                // 刷新显示
+                this.renderAdminFlowers();
+            } else {
+                throw new Error(result.error || '修复失败');
+            }
+        } catch (error) {
+            console.error('修复日期失败:', error);
+            alert('修复失败：' + (error.message || '请稍后重试'));
+        } finally {
+            if (fixBtn) {
+                fixBtn.disabled = false;
+                fixBtn.textContent = '修复日期错误';
+            }
+        }
     }
     
     async renderAdminFlowers() {

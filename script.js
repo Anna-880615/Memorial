@@ -651,10 +651,21 @@ class FlowerSection {
         });
     }
     
+    // 获取本地时区的日期字符串（YYYY-MM-DD格式）
+    getLocalDateString() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+    
     async loadToday() {
         try {
             const apiEndpoint = typeof CONFIG !== 'undefined' ? CONFIG.API_ENDPOINT : '/api';
-            const response = await fetch(`${apiEndpoint}/flowers/today`);
+            // 传递本地时区的日期给后端
+            const localDate = this.getLocalDateString();
+            const response = await fetch(`${apiEndpoint}/flowers/today?date=${localDate}`);
             const data = await response.json();
             if (data.success) {
                 this.count = data.count || 0;
@@ -709,7 +720,7 @@ class FlowerSection {
                 },
                 body: JSON.stringify({
                     count: num,
-                    date: new Date().toISOString().split('T')[0]
+                    date: this.getLocalDateString() // 使用本地时区的日期
                 })
             });
             

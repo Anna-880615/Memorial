@@ -55,7 +55,22 @@ export default async function handler(req, res) {
       });
     }
 
-    const today = date || new Date().toISOString().split('T')[0];
+    // 使用前端传递的日期，如果没有则使用本地时区的日期
+    // 注意：Vercel 服务器默认是 UTC 时区，所以如果前端没传日期，我们需要使用固定时区（如中国时区 UTC+8）
+    let today;
+    if (date) {
+        // 使用前端传递的日期（前端已按本地时区计算）
+        today = date;
+    } else {
+        // 如果没有传递日期，使用中国时区（UTC+8）计算日期
+        // 这样可以确保按照日历日期（晚上24点）重置
+        const now = new Date();
+        const chinaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Shanghai' }));
+        const year = chinaTime.getFullYear();
+        const month = String(chinaTime.getMonth() + 1).padStart(2, '0');
+        const day = String(chinaTime.getDate()).padStart(2, '0');
+        today = `${year}-${month}-${day}`;
+    }
     const maxPerDay = 21;
 
     // 检查今日已送数量

@@ -32,7 +32,20 @@ export default async function handler(req, res) {
     userIp = req.socket.remoteAddress;
   }
   
-  const today = new Date().toISOString().split('T')[0];
+  // 优先使用前端传递的日期（查询参数），如果没有则使用中国时区计算
+  let today;
+  if (req.query && req.query.date) {
+    // 使用前端传递的日期（前端已按本地时区计算）
+    today = req.query.date;
+  } else {
+    // 使用中国时区（UTC+8）计算日期，确保按照日历日期重置
+    const now = new Date();
+    const chinaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Shanghai' }));
+    const year = chinaTime.getFullYear();
+    const month = String(chinaTime.getMonth() + 1).padStart(2, '0');
+    const day = String(chinaTime.getDate()).padStart(2, '0');
+    today = `${year}-${month}-${day}`;
+  }
 
   try {
     const { data, error } = await supabase

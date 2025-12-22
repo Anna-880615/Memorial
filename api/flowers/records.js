@@ -62,12 +62,28 @@ export default async function handler(req, res) {
     if (error) throw error;
 
     // 按日期和 IP 分组统计
+    // 重要：基于 created_at 的真实时间戳计算日期，而不是使用 date 字段
+    // 这样可以确保日期和时间戳一致
     const stats = {};
     data.forEach(record => {
-      const key = `${record.date}_${record.user_ip}`;
+      // 从 created_at 计算真实的日期（转换为本地时区）
+      let realDate;
+      if (record.created_at) {
+        const dateObj = new Date(record.created_at);
+        // 使用 UTC 时间转换为本地时区的日期
+        const year = dateObj.getFullYear();
+        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const day = String(dateObj.getDate()).padStart(2, '0');
+        realDate = `${year}-${month}-${day}`;
+      } else {
+        // 如果没有 created_at，使用 date 字段作为后备
+        realDate = record.date;
+      }
+      
+      const key = `${realDate}_${record.user_ip}`;
       if (!stats[key]) {
         stats[key] = {
-          date: record.date,
+          date: realDate, // 使用基于 created_at 计算的真实日期
           user_ip: record.user_ip,
           total_count: 0,
           records: []

@@ -1554,20 +1554,20 @@ class AdminManager {
         return `${year}/${month}/${day} ${hours}:${minutes}`;
     }
     
-    // 格式化送花记录的时间（使用date字段的日期，created_at的时间）
-    formatFlowerRecordTime(createdAt, dateField) {
+    // 格式化送花记录的时间（基于 created_at 的真实时间戳，不篡改时间）
+    formatFlowerRecordTime(createdAt) {
         if (!createdAt) return '未知时间';
         
-        // 从 created_at 提取时间部分（转换为本地时区）
+        // 直接使用 created_at 的真实时间戳，转换为本地时区显示
         const date = new Date(createdAt);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
         const hours = String(date.getHours()).padStart(2, '0');
         const minutes = String(date.getMinutes()).padStart(2, '0');
         
-        // 使用 date 字段的日期（这是前端计算的本地日期）
-        // 格式：YYYY-MM-DD -> YYYY/MM/DD
-        const dateStr = dateField.replace(/-/g, '/');
-        
-        return `${dateStr} ${hours}:${minutes}`;
+        // 显示真实的送花时间（不篡改）
+        return `${year}/${month}/${day} ${hours}:${minutes}`;
     }
     
     async renderAdminFlowers() {
@@ -1633,7 +1633,7 @@ class AdminManager {
                                 ${stat.records.map(r => `
                                     <div class="stat-record">
                                         <span>${r.flower_count} 朵</span>
-                                        <span class="stat-time">${this.formatFlowerRecordTime(r.created_at, stat.date)}</span>
+                                        <span class="stat-time">${this.formatFlowerRecordTime(r.created_at)}</span>
                                     </div>
                                 `).join('')}
                             </div>
@@ -1647,11 +1647,20 @@ class AdminManager {
                 html += '<h3>详细记录</h3>';
                 html += '<div class="admin-flowers-records-list">';
                 html += records.map(record => {
-                    const createdTime = this.formatFlowerRecordTime(record.created_at, record.date);
+                    // 基于 created_at 计算真实的日期
+                    let realDate = record.date;
+                    if (record.created_at) {
+                        const dateObj = new Date(record.created_at);
+                        const year = dateObj.getFullYear();
+                        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                        const day = String(dateObj.getDate()).padStart(2, '0');
+                        realDate = `${year}-${month}-${day}`;
+                    }
+                    const createdTime = this.formatFlowerRecordTime(record.created_at);
                     return `
                         <div class="admin-flower-record-item">
                             <div class="record-info">
-                                <span class="record-date">日期：${record.date}</span>
+                                <span class="record-date">日期：${realDate}</span>
                                 <span class="record-ip">IP：${record.user_ip}</span>
                                 <span class="record-count">数量：${record.flower_count} 朵</span>
                                 <span class="record-time">时间：${createdTime}</span>

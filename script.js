@@ -285,8 +285,73 @@ class ImageCarousel {
         this.wrapper.addEventListener('transitionend', () => this.checkReset());
         // 触摸事件
         this.setupTouchEvents();
+        // 监听页面滚动，确保轮播状态正确
+        this.setupScrollListener();
+        // 监听轮播容器可见性，当重新进入视口时恢复状态
+        this.setupVisibilityObserver();
         // 自动播放
         this.autoPlayTimer = setInterval(() => { if(!this.isTransitioning && !this.isDragging) this.move(1); }, 5000);
+    }
+    
+    setupScrollListener() {
+        let scrollTimeout;
+        // 监听页面滚动，当滚动时重置拖拽状态
+        window.addEventListener('scroll', () => {
+            // 如果正在拖拽，取消拖拽状态
+            if (this.isDragging) {
+                this.isDragging = false;
+                this.updatePosition(true);
+            }
+            
+            // 防抖：滚动停止后检查轮播位置
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                // 检查轮播容器是否在视口内
+                const container = this.wrapper.closest('.carousel-container');
+                if (container) {
+                    const rect = container.getBoundingClientRect();
+                    const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+                    
+                    // 如果轮播重新进入视口，确保位置正确
+                    if (isVisible && !this.isTransitioning) {
+                        this.updatePosition(false);
+                    }
+                }
+            }, 150);
+        }, { passive: true });
+    }
+    
+    setupVisibilityObserver() {
+        // 使用 IntersectionObserver 监听轮播容器可见性
+        const container = this.wrapper.closest('.carousel-container');
+        if (!container) return;
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // 轮播容器重新进入视口
+                    // 重置拖拽状态，确保位置正确
+                    if (this.isDragging) {
+                        this.isDragging = false;
+                    }
+                    // 确保位置正确（无动画）
+                    if (!this.isTransitioning) {
+                        this.updatePosition(false);
+                    }
+                } else {
+                    // 轮播容器移出视口时，重置拖拽状态
+                    if (this.isDragging) {
+                        this.isDragging = false;
+                        this.updatePosition(true);
+                    }
+                }
+            });
+        }, {
+            threshold: 0.1, // 当10%可见时触发
+            rootMargin: '0px'
+        });
+        
+        observer.observe(container);
     }
     
     setupTouchEvents() {
@@ -371,6 +436,38 @@ class ImageCarousel {
             this.isDragging = false;
             touchDirection = null;
             this.updatePosition(true);
+        }, { passive: true });
+        
+        // 监听全局触摸事件，防止页面滚动时拖拽状态未重置
+        document.addEventListener('touchmove', (e) => {
+            // 如果触摸不在轮播容器内，且正在拖拽，重置状态
+            if (this.isDragging && !this.wrapper.contains(e.target)) {
+                this.isDragging = false;
+                touchDirection = null;
+                this.updatePosition(true);
+            }
+        }, { passive: true });
+        
+        // 监听页面滚动开始，重置拖拽状态
+        let scrollStartY = 0;
+        window.addEventListener('touchstart', (e) => {
+            // 如果触摸不在轮播容器内，记录滚动起始位置
+            if (!this.wrapper.contains(e.target)) {
+                scrollStartY = e.touches[0].clientY;
+            }
+        }, { passive: true });
+        
+        window.addEventListener('touchmove', (e) => {
+            // 如果触摸不在轮播容器内，且发生了明显的垂直滚动，重置轮播拖拽状态
+            if (!this.wrapper.contains(e.target) && this.isDragging) {
+                const currentY = e.touches[0].clientY;
+                const deltaY = Math.abs(currentY - scrollStartY);
+                if (deltaY > 10) {
+                    this.isDragging = false;
+                    touchDirection = null;
+                    this.updatePosition(true);
+                }
+            }
         }, { passive: true });
     }
     cloneSlides() {

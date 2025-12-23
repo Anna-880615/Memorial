@@ -1011,13 +1011,35 @@ class MusicPlayer {
         window.musicPlayer = this;
         this.renderList();
         
-        // 检测移动端，移动端使用系统音量键控制，设置音量为100%
-        const isMobile = window.innerWidth <= 768;
-        if (isMobile) {
-            this.audio.volume = 1.0; // 移动端设置为100%，让系统音量键完全控制
+        // 智能设备检测函数
+        const getDeviceType = () => {
+            const width = window.innerWidth;
+            const isTouch = 'ontouchstart' in window || 
+                          navigator.maxTouchPoints > 0 || 
+                          navigator.msMaxTouchPoints > 0;
+            
+            if (!isTouch) {
+                return 'desktop'; // 非触摸设备 = PC
+            }
+            
+            if (width <= 480) {
+                return 'mobile'; // 手机（≤480px + 触摸）
+            } else if (width <= 1024) {
+                return 'tablet'; // 平板（481px-1024px + 触摸）
+            } else {
+                return 'desktop'; // 大屏触摸设备 = 触摸屏PC
+            }
+        };
+        
+        // 根据设备类型设置音量控制
+        const deviceType = getDeviceType();
+        const volumeBar = document.getElementById('volumeBar');
+        
+        if (deviceType === 'mobile') {
+            // 手机：设置音量为100%，使用系统音量键控制
+            this.audio.volume = 1.0;
         } else {
-            // PC端使用滑块控制，设置初始音量（从滑块默认值70%）
-            const volumeBar = document.getElementById('volumeBar');
+            // 平板和PC：使用滑块控制，设置初始音量（从滑块默认值70%）
             if (volumeBar) {
                 this.audio.volume = volumeBar.value / 100;
             }
@@ -1046,11 +1068,12 @@ class MusicPlayer {
             this.audio.currentTime = time;
         };
         
-        // PC端音量滑块控制（移动端滑块已隐藏）
-        const volumeBar = document.getElementById('volumeBar');
+        // 音量滑块控制（手机端滑块已隐藏，平板和PC端可用）
         if (volumeBar) {
             volumeBar.oninput = (e) => {
-                if (!isMobile) { // 只在PC端响应滑块变化
+                const currentDeviceType = getDeviceType();
+                if (currentDeviceType !== 'mobile') {
+                    // 平板和PC端响应滑块变化
                     this.audio.volume = e.target.value / 100;
                 }
             };
@@ -1058,12 +1081,12 @@ class MusicPlayer {
         
         // 监听窗口大小变化，处理屏幕旋转等情况
         window.addEventListener('resize', () => {
-            const currentIsMobile = window.innerWidth <= 768;
-            if (currentIsMobile) {
-                // 切换到移动端：设置音量为100%，让系统音量键控制
+            const currentDeviceType = getDeviceType();
+            if (currentDeviceType === 'mobile') {
+                // 切换到手机：设置音量为100%，让系统音量键控制
                 this.audio.volume = 1.0;
             } else {
-                // 切换到PC端：恢复滑块控制
+                // 切换到平板或PC：恢复滑块控制
                 if (volumeBar) {
                     this.audio.volume = volumeBar.value / 100;
                 }

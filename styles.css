@@ -897,12 +897,16 @@ body {
     }
 }
 
-/* 超小屏幕优化（手机竖屏） */
-@media (max-width: 480px) {
-    /* 手机端隐藏音量滑块，使用系统音量键控制 */
+/* 移动设备优化（手机和平板） */
+@media (max-width: 1024px) {
+    /* 手机和平板端隐藏音量滑块，使用系统音量键控制 */
     .volume-control {
         display: none !important;
     }
+}
+
+/* 超小屏幕优化（手机竖屏） */
+@media (max-width: 480px) {
     
     .nav-menu {
         gap: 2px;

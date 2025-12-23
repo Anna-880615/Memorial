@@ -1243,11 +1243,11 @@ class MusicPlayer {
         const deviceType = getDeviceType();
         const volumeBar = document.getElementById('volumeBar');
         
-        if (deviceType === 'mobile') {
-            // 手机：设置音量为100%，使用系统音量键控制
+        if (deviceType === 'mobile' || deviceType === 'tablet') {
+            // 手机和平板：设置音量为100%，使用系统音量键控制
             this.audio.volume = 1.0;
         } else {
-            // 平板和PC：使用滑块控制，设置初始音量（从滑块默认值70%）
+            // PC：使用滑块控制，设置初始音量（从滑块默认值70%）
             if (volumeBar) {
                 this.audio.volume = volumeBar.value / 100;
             }
@@ -1276,12 +1276,12 @@ class MusicPlayer {
             this.audio.currentTime = time;
         };
         
-        // 音量滑块控制（手机端滑块已隐藏，平板和PC端可用）
+        // 音量滑块控制（手机和平板端滑块已隐藏，仅PC端可用）
         if (volumeBar) {
             volumeBar.oninput = (e) => {
                 const currentDeviceType = getDeviceType();
-                if (currentDeviceType !== 'mobile') {
-                    // 平板和PC端响应滑块变化
+                if (currentDeviceType === 'desktop') {
+                    // 仅PC端响应滑块变化
                     this.audio.volume = e.target.value / 100;
                 }
             };
@@ -1290,11 +1290,11 @@ class MusicPlayer {
         // 监听窗口大小变化，处理屏幕旋转等情况
         window.addEventListener('resize', () => {
             const currentDeviceType = getDeviceType();
-            if (currentDeviceType === 'mobile') {
-                // 切换到手机：设置音量为100%，让系统音量键控制
+            if (currentDeviceType === 'mobile' || currentDeviceType === 'tablet') {
+                // 切换到手机或平板：设置音量为100%，让系统音量键控制
                 this.audio.volume = 1.0;
             } else {
-                // 切换到平板或PC：恢复滑块控制
+                // 切换到PC：恢复滑块控制
                 if (volumeBar) {
                     this.audio.volume = volumeBar.value / 100;
                 }

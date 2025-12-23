@@ -5,6 +5,8 @@ const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
+  // 添加 HTTP 缓存头：今日送花数需要实时性，缓存10秒
+  res.setHeader('Cache-Control', 'public, max-age=10');
   
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });

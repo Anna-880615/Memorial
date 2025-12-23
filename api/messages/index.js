@@ -31,6 +31,15 @@ export default async function handler(req, res) {
       const adminToken = extractAdminToken(req);
       const isAdmin = adminToken && verifyAdminToken(adminToken);
       
+      // 只有非管理员请求才使用缓存（管理员需要看到最新的待审核留言）
+      if (!isAdmin) {
+        // 添加 HTTP 缓存头：留言列表缓存20秒
+        res.setHeader('Cache-Control', 'public, max-age=20');
+      } else {
+        // 管理员请求不缓存，确保看到最新数据
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      }
+      
       let query = supabase
         .from('messages')
         .select('*');

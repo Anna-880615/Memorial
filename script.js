@@ -674,8 +674,8 @@ class MessageBoard {
     async loadMessages() {
         try {
             const apiEndpoint = typeof CONFIG !== 'undefined' ? CONFIG.API_ENDPOINT : '/api';
-            const response = await fetch(`${apiEndpoint}/messages`);
-            const data = await response.json();
+            const url = `${apiEndpoint}/messages`;
+            const data = await cachedFetch(url);
             if (data.success) {
                 this.messages = data.messages || [];
             }
@@ -723,6 +723,11 @@ class MessageBoard {
                 // 提交成功，但需要审核，所以不立即显示
                 this.input.value = '';
                 alert(languageManager ? languageManager.t('message.submitted') : '留言已提交，等待审核通过后将显示。');
+                // 清除留言列表缓存，强制刷新
+                const apiEndpoint = typeof CONFIG !== 'undefined' ? CONFIG.API_ENDPOINT : '/api';
+                if (typeof apiCache !== 'undefined') {
+                    apiCache.clear(`${apiEndpoint}/messages`);
+                }
                 // 重新加载留言列表（可能会有延迟）
                 setTimeout(() => this.loadMessages(), 1000);
             } else {
@@ -906,12 +911,13 @@ class FlowerSection {
             const apiEndpoint = typeof CONFIG !== 'undefined' ? CONFIG.API_ENDPOINT : '/api';
             // 传递时区偏移给后端，让后端基于本地时间计算日期
             const timezoneOffset = -new Date().getTimezoneOffset();
-            const response = await fetch(`${apiEndpoint}/flowers/today?timezoneOffset=${timezoneOffset}`, {
+            const url = `${apiEndpoint}/flowers/today?timezoneOffset=${timezoneOffset}`;
+            const options = {
                 headers: {
                     'X-Timezone-Offset': timezoneOffset.toString()
                 }
-            });
-            const data = await response.json();
+            };
+            const data = await cachedFetch(url, options);
             if (data.success) {
                 this.count = data.count || 0;
             }
@@ -924,8 +930,8 @@ class FlowerSection {
     async loadTotal() {
         try {
             const apiEndpoint = typeof CONFIG !== 'undefined' ? CONFIG.API_ENDPOINT : '/api';
-            const response = await fetch(`${apiEndpoint}/flowers/total`);
-            const data = await response.json();
+            const url = `${apiEndpoint}/flowers/total`;
+            const data = await cachedFetch(url);
             if (data.success) {
                 this.total = data.total || 0;
             }
@@ -1014,6 +1020,15 @@ class FlowerSection {
             this.total = result.total;
             this.createHearts(num);
             this.updateDisplay();
+            
+            // 清除送花相关的缓存，确保下次刷新时获取最新数据
+            if (typeof apiCache !== 'undefined') {
+                const timezoneOffset = -new Date().getTimezoneOffset();
+                apiCache.clear(`${apiEndpoint}/flowers/today?timezoneOffset=${timezoneOffset}`, {
+                    headers: { 'X-Timezone-Offset': timezoneOffset.toString() }
+                });
+                apiCache.clear(`${apiEndpoint}/flowers/total`);
+            }
         } catch (error) {
             console.error('送花失败:', error);
             // 使用语言系统的错误提示

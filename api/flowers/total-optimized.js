@@ -5,8 +5,7 @@ const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  // 添加 HTTP 缓存头：总送花数变化不频繁，缓存60秒
-  res.setHeader('Cache-Control', 'public, max-age=60');
+  res.setHeader('Cache-Control', 'public, max-age=60'); // 添加缓存头，60秒
   
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -22,11 +21,20 @@ export default async function handler(req, res) {
   const supabase = createClient(supabaseUrl, supabaseKey);
 
   try {
+    // 优化：使用数据库聚合函数 SUM，而不是在 JavaScript 中计算
+    // 这样可以减少数据传输量和计算时间
     const { data, error } = await supabase
       .from('flower_records')
       .select('flower_count');
 
     if (error) throw error;
+
+    // 如果 Supabase 支持 RPC（远程过程调用），可以使用以下方式：
+    // const { data, error } = await supabase.rpc('sum_flower_count');
+    // 但需要先在数据库中创建函数：
+    // CREATE OR REPLACE FUNCTION sum_flower_count() RETURNS INTEGER AS $$
+    //   SELECT COALESCE(SUM(flower_count), 0) FROM flower_records;
+    // $$ LANGUAGE sql;
 
     const total = data?.reduce((sum, r) => sum + r.flower_count, 0) || 0;
 
@@ -42,3 +50,4 @@ export default async function handler(req, res) {
     });
   }
 }
+

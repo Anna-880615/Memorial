@@ -272,6 +272,7 @@ class ImageCarousel {
         this.touchStartY = 0;
         this.touchCurrentX = 0;
         this.isDragging = false;
+        this.touchDirection = null; // 将 touchDirection 作为实例变量
         this.threshold = 50; // 滑动阈值
         this.init();
     }
@@ -300,6 +301,7 @@ class ImageCarousel {
             // 如果正在拖拽，取消拖拽状态
             if (this.isDragging) {
                 this.isDragging = false;
+                this.touchDirection = null;
                 this.updatePosition(true);
             }
             
@@ -333,6 +335,7 @@ class ImageCarousel {
                     // 重置拖拽状态，确保位置正确
                     if (this.isDragging) {
                         this.isDragging = false;
+                        this.touchDirection = null;
                     }
                     // 确保位置正确（无动画）
                     if (!this.isTransitioning) {
@@ -342,6 +345,7 @@ class ImageCarousel {
                     // 轮播容器移出视口时，重置拖拽状态
                     if (this.isDragging) {
                         this.isDragging = false;
+                        this.touchDirection = null;
                         this.updatePosition(true);
                     }
                 }
@@ -355,15 +359,13 @@ class ImageCarousel {
     }
     
     setupTouchEvents() {
-        let touchDirection = null; // 'horizontal' 或 'vertical'，null 表示未确定
-        
         this.wrapper.addEventListener('touchstart', (e) => {
             if (this.isTransitioning) return;
             this.touchStartX = e.touches[0].clientX;
             this.touchStartY = e.touches[0].clientY;
             this.touchCurrentX = this.touchStartX;
             this.isDragging = true;
-            touchDirection = null; // 重置方向
+            this.touchDirection = null; // 重置方向
             this.wrapper.style.transition = 'none';
         }, { passive: true });
         
@@ -378,17 +380,18 @@ class ImageCarousel {
             const absDeltaY = Math.abs(deltaY);
             
             // 如果方向还未确定，先判断滑动方向
-            if (touchDirection === null) {
+            if (this.touchDirection === null) {
                 // 需要移动超过一定距离才能确定方向（避免误判）
                 const minDistance = 15;
                 if (absDeltaX > minDistance || absDeltaY > minDistance) {
                     // 水平滑动明显大于垂直滑动（至少是2倍），才认为是水平滑动
                     if (absDeltaX > absDeltaY * 2) {
-                        touchDirection = 'horizontal';
+                        this.touchDirection = 'horizontal';
                     } else if (absDeltaY > absDeltaX * 2) {
-                        touchDirection = 'vertical';
+                        this.touchDirection = 'vertical';
                         // 如果是垂直滑动，立即停止处理，让页面正常滚动
                         this.isDragging = false;
+                        this.touchDirection = null;
                         this.updatePosition(true);
                         return;
                     }
@@ -396,18 +399,27 @@ class ImageCarousel {
             }
             
             // 只有在明确是水平滑动时才阻止默认行为并处理轮播
-            if (touchDirection === 'horizontal' && absDeltaX > 10) {
+            if (this.touchDirection === 'horizontal' && absDeltaX > 10) {
                 e.preventDefault();
                 const currentOffset = -this.currentIndex * 100;
                 const movePercent = (deltaX / window.innerWidth) * 100;
                 this.wrapper.style.transform = `translateX(${currentOffset + movePercent}%)`;
+            } else if (this.touchDirection === 'vertical' || (this.touchDirection === null && absDeltaY > absDeltaX)) {
+                // 如果是垂直滑动或未确定但偏向垂直，重置状态，让页面滚动
+                this.isDragging = false;
+                this.touchDirection = null;
+                this.updatePosition(true);
             }
         }, { passive: false });
         
         this.wrapper.addEventListener('touchend', (e) => {
-            if (!this.isDragging) return;
+            if (!this.isDragging) {
+                // 如果已经不在拖拽状态，确保位置正确
+                this.updatePosition(false);
+                return;
+            }
             
-            const wasHorizontal = touchDirection === 'horizontal';
+            const wasHorizontal = this.touchDirection === 'horizontal';
             this.isDragging = false;
             
             // 只有在水平滑动时才处理切换
@@ -429,12 +441,12 @@ class ImageCarousel {
                 this.updatePosition(true);
             }
             
-            touchDirection = null; // 重置方向
+            this.touchDirection = null; // 重置方向
         }, { passive: true });
         
         this.wrapper.addEventListener('touchcancel', () => {
             this.isDragging = false;
-            touchDirection = null;
+            this.touchDirection = null;
             this.updatePosition(true);
         }, { passive: true });
         
@@ -443,7 +455,7 @@ class ImageCarousel {
             // 如果触摸不在轮播容器内，且正在拖拽，重置状态
             if (this.isDragging && !this.wrapper.contains(e.target)) {
                 this.isDragging = false;
-                touchDirection = null;
+                this.touchDirection = null;
                 this.updatePosition(true);
             }
         }, { passive: true });
@@ -495,9 +507,17 @@ class ImageCarousel {
         this.updatePosition(true);
     }
     updatePosition(animate) {
+        // 确保拖拽状态已重置
+        if (!animate) {
+            this.isDragging = false;
+            this.touchDirection = null;
+        }
+        
         this.isTransitioning = animate;
         this.wrapper.style.transition = animate ? 'transform 0.5s ease-in-out' : 'none';
-        this.wrapper.style.transform = `translateX(-${this.currentIndex * 100}%)`;
+        // 确保 transform 值正确计算
+        const offset = -this.currentIndex * 100;
+        this.wrapper.style.transform = `translateX(${offset}%)`;
         this.updateIndicators();
     }
     updateIndicators() {

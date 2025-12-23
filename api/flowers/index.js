@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { validateIpAddress, validateFlowerCount, validateTimezoneOffset } from '../utils/validation.js';
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
@@ -25,45 +26,44 @@ export default async function handler(req, res) {
 
   const supabase = createClient(supabaseUrl, supabaseKey);
   
-  // 获取用户 IP 地址（处理 Vercel 等 serverless 环境）
+  // 获取并验证用户 IP 地址（处理 Vercel 等 serverless 环境）
   let userIp = 'unknown';
   if (req.headers['x-forwarded-for']) {
     // x-forwarded-for 可能包含多个 IP（代理链），取第一个
-    userIp = req.headers['x-forwarded-for'].split(',')[0].trim();
+    const rawIp = req.headers['x-forwarded-for'].split(',')[0].trim();
+    userIp = validateIpAddress(rawIp) || 'unknown';
   } else if (req.headers['x-real-ip']) {
-    userIp = req.headers['x-real-ip'];
+    userIp = validateIpAddress(req.headers['x-real-ip']) || 'unknown';
   } else if (req.connection?.remoteAddress) {
-    userIp = req.connection.remoteAddress;
+    userIp = validateIpAddress(req.connection.remoteAddress) || 'unknown';
   } else if (req.socket?.remoteAddress) {
-    userIp = req.socket.remoteAddress;
+    userIp = validateIpAddress(req.socket.remoteAddress) || 'unknown';
   }
   
-  // 调试日志（生产环境可以移除）
-  console.log('送花请求 - 用户IP:', userIp, '请求头:', {
-    'x-forwarded-for': req.headers['x-forwarded-for'],
-    'x-real-ip': req.headers['x-real-ip']
-  });
+  // 如果IP验证失败，使用默认值（但记录警告）
+  if (userIp === 'unknown') {
+    console.warn('无法获取有效的用户IP地址');
+  }
   
-    const { count, date } = req.body;
+  const { count } = req.body;
 
   try {
-    // 验证输入
-    if (!count || count <= 0) {
+    // 验证送花数量
+    const validatedCount = validateFlowerCount(count);
+    if (!validatedCount) {
       return res.status(400).json({
         success: false,
-        message: '送花数量无效'
+        message: '送花数量无效，必须是1-21之间的整数'
       });
     }
 
-    // 获取用户时区偏移（前端传递的是 -getTimezoneOffset()）
-    const timezoneOffset = req.headers['x-timezone-offset'] 
-      ? parseInt(req.headers['x-timezone-offset']) 
-      : null;
+    // 验证并获取用户时区偏移（前端传递的是 -getTimezoneOffset()）
+    const timezoneOffset = validateTimezoneOffset(req.headers['x-timezone-offset']);
     
     if (timezoneOffset === null) {
       return res.status(400).json({
         success: false,
-        message: '缺少时区信息，无法确定日期'
+        message: '缺少或无效的时区信息，无法确定日期'
       });
     }
 
@@ -106,7 +106,7 @@ export default async function handler(req, res) {
         .reduce((sum, r) => sum + r.flower_count, 0);
     }
 
-    if (todayCount + count > maxPerDay) {
+    if (todayCount + validatedCount > maxPerDay) {
       return res.status(400).json({
         success: false,
         message: `今天最多只能送${maxPerDay}朵花，您还可以送${maxPerDay - todayCount}朵`
@@ -120,7 +120,7 @@ export default async function handler(req, res) {
       .insert([
         {
           user_ip: userIp,
-          flower_count: count,
+          flower_count: validatedCount, // 使用验证后的数量
           date: today // 基于用户本地时间计算的日期
         }
       ]);
@@ -138,7 +138,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       success: true,
-      todayCount: todayCount + count,
+      todayCount: todayCount + validatedCount,
       total: total
     });
   } catch (error) {

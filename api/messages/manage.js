@@ -1,6 +1,7 @@
 // 留言管理API（审核、删除）
 import { createClient } from '@supabase/supabase-js';
 import { extractAdminToken, verifyAdminToken } from '../utils/auth.js';
+import { validateMessageId } from '../utils/validation.js';
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
@@ -34,10 +35,12 @@ export default async function handler(req, res) {
   const supabase = createClient(supabaseUrl, supabaseKey);
   const { id, action } = req.body;
 
-  if (!id) {
+  // 验证留言ID
+  const validatedId = validateMessageId(id);
+  if (!validatedId) {
     return res.status(400).json({
       success: false,
-      error: '留言ID不能为空'
+      error: '留言ID无效'
     });
   }
 
@@ -53,11 +56,11 @@ export default async function handler(req, res) {
 
       const status = action === 'approve' ? 'approved' : 'rejected';
 
-      // 更新留言状态
+      // 更新留言状态（使用验证后的ID）
       const { data, error } = await supabase
         .from('messages')
         .update({ status: status })
-        .eq('id', id)
+        .eq('id', validatedId)
         .select()
         .single();
 
@@ -87,11 +90,11 @@ export default async function handler(req, res) {
   // DELETE: 删除留言
   if (req.method === 'DELETE') {
     try {
-      // 先检查留言是否存在
+      // 先检查留言是否存在（使用验证后的ID）
       const { data: message, error: fetchError } = await supabase
         .from('messages')
         .select('id')
-        .eq('id', id)
+        .eq('id', validatedId)
         .single();
 
       if (fetchError || !message) {
@@ -101,11 +104,11 @@ export default async function handler(req, res) {
         });
       }
 
-      // 删除留言
+      // 删除留言（使用验证后的ID）
       const { error: deleteError } = await supabase
         .from('messages')
         .delete()
-        .eq('id', id);
+        .eq('id', validatedId);
 
       if (deleteError) throw deleteError;
 

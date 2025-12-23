@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { extractAdminToken, verifyAdminToken } from '../utils/auth.js';
+import { validateText, validateInteger } from '../utils/validation.js';
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
@@ -63,20 +64,21 @@ export default async function handler(req, res) {
     try {
       const { text, timestamp } = req.body;
 
-      // 基础验证
-      if (!text || text.trim().length === 0) {
+      // 验证并清理留言内容
+      const validatedText = validateText(text, 1000);
+      if (!validatedText) {
         return res.status(400).json({
           success: false,
-          error: '留言内容不能为空'
+          error: '留言内容无效或过长（最多1000字）'
         });
       }
 
-      // 按实际字符数计算（中英文都算1个字符，使用 Array.from 正确处理多字节字符）
-      const charCount = Array.from(text).length;
-      if (charCount > 1000) {
+      // 验证时间戳（如果提供）
+      const validatedTimestamp = timestamp ? validateInteger(timestamp, 0, Number.MAX_SAFE_INTEGER) : Date.now();
+      if (!validatedTimestamp) {
         return res.status(400).json({
           success: false,
-          error: `留言内容过长（最多1000字，当前${charCount}字）`
+          error: '时间戳无效'
         });
       }
 
@@ -91,13 +93,13 @@ export default async function handler(req, res) {
         });
       }
 
-      // 插入数据库
+      // 插入数据库（使用验证后的数据）
       const { data, error } = await supabase
         .from('messages')
         .insert([
           {
-            text: text.trim(),
-            timestamp: timestamp || Date.now(),
+            text: validatedText, // 使用验证后的文本
+            timestamp: validatedTimestamp, // 使用验证后的时间戳
             status: 'pending' // 需要审核
           }
         ])

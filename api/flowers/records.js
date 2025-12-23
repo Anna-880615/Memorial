@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { extractAdminToken, verifyAdminToken } from '../utils/auth.js';
+import { validateDateString, validateIpAddress, validateLimit } from '../utils/validation.js';
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
@@ -36,26 +37,41 @@ export default async function handler(req, res) {
   const supabase = createClient(supabaseUrl, supabaseKey);
 
   try {
-    // 获取查询参数
-    const { date, user_ip, limit = 100 } = req.query;
+    // 获取并验证查询参数
+    const { date, user_ip, limit } = req.query;
 
     let query = supabase
       .from('flower_records')
       .select('*')
       .order('created_at', { ascending: false });
 
-    // 如果指定了日期，过滤日期
+    // 如果指定了日期，验证并过滤日期
     if (date) {
-      query = query.eq('date', date);
+      const validatedDate = validateDateString(date);
+      if (!validatedDate) {
+        return res.status(400).json({
+          success: false,
+          error: '日期格式无效，必须是 YYYY-MM-DD 格式'
+        });
+      }
+      query = query.eq('date', validatedDate);
     }
 
-    // 如果指定了 IP，过滤 IP
+    // 如果指定了 IP，验证并过滤 IP
     if (user_ip) {
-      query = query.eq('user_ip', user_ip);
+      const validatedIp = validateIpAddress(user_ip);
+      if (!validatedIp) {
+        return res.status(400).json({
+          success: false,
+          error: 'IP地址格式无效'
+        });
+      }
+      query = query.eq('user_ip', validatedIp);
     }
 
-    // 限制返回数量
-    query = query.limit(parseInt(limit));
+    // 验证并限制返回数量
+    const validatedLimit = validateLimit(limit);
+    query = query.limit(validatedLimit);
 
     const { data, error } = await query;
 

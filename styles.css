@@ -103,7 +103,6 @@ body {
     height: 100%; 
     position: relative;
     overflow: hidden;
-    background: #000; /* 深色背景，减少黑边视觉影响 */
 }
 .carousel-slide img { 
     width: 100%; 
@@ -744,16 +743,6 @@ body {
         touch-action: pan-x pan-y; /* 允许水平和垂直滑动，JavaScript 会处理水平滑动逻辑 */
     }
     
-    /* 移动端竖屏：完整显示图片，使用 contain */
-    .carousel-slide {
-        background: #000; /* 深色背景，与页面风格一致 */
-    }
-    
-    .carousel-slide img {
-        object-fit: contain; /* 完整显示图片，不被裁剪 */
-        object-position: center; /* 居中显示 */
-    }
-    
     /* 主界面 */
     .name-chinese { font-size: clamp(36px, 10vw, 64px); }
     .name-english { font-size: clamp(18px, 4vw, 28px); }
@@ -915,12 +904,6 @@ body {
         display: none !important;
     }
     
-    /* 手机竖屏：确保图片完整显示 */
-    .carousel-slide img {
-        object-fit: contain !important; /* 完整显示图片 */
-        object-position: center !important; /* 居中显示 */
-    }
-    
     .nav-menu {
         gap: 2px;
     }
@@ -939,14 +922,6 @@ body {
     .album-cover { width: 100px; height: 100px; }
 }
 
-/* 移动端横屏优化 */
-@media (max-width: 768px) and (orientation: landscape) {
-    /* 横屏时使用 cover，因为横屏宽高比更适合横版图片 */
-    .carousel-slide img {
-        object-fit: cover !important;
-        object-position: center !important;
-    }
-}
 
 /* 滚动条美化 */
 ::-webkit-scrollbar { width: 6px; }

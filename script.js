@@ -1226,17 +1226,19 @@ class MusicPlayer {
                           navigator.maxTouchPoints > 0 || 
                           navigator.msMaxTouchPoints > 0;
             
+            // 非触摸设备 = PC（无论屏幕大小）
             if (!isTouch) {
-                return 'desktop'; // 非触摸设备 = PC
+                return 'desktop';
             }
             
+            // 触摸设备：根据宽度区分手机和平板
+            // 注意：所有触摸设备都应该隐藏音量滑块（由CSS的触摸检测处理）
             if (width <= 480) {
                 return 'mobile'; // 手机（≤480px + 触摸）
-            } else if (width <= 1366) {
-                // 平板（481px-1366px + 触摸），包括 iPad Pro 横屏（1366px）
-                return 'tablet';
             } else {
-                return 'desktop'; // 大屏触摸设备 = 触摸屏PC
+                // 平板（>480px + 触摸），包括所有尺寸的平板（横屏竖屏）
+                // 不再限制上限，因为CSS已经通过触摸检测来处理了
+                return 'tablet';
             }
         };
         

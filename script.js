@@ -273,6 +273,7 @@ class ImageCarousel {
         this.touchCurrentX = 0;
         this.isDragging = false;
         this.touchDirection = null; // 将 touchDirection 作为实例变量
+        this.isZooming = false; // 是否正在缩放
         this.threshold = 50; // 滑动阈值
         this.init();
     }
@@ -360,7 +361,20 @@ class ImageCarousel {
     
     setupTouchEvents() {
         this.wrapper.addEventListener('touchstart', (e) => {
-            if (this.isTransitioning) return;
+            // 检测双指触摸（缩放手势）
+            if (e.touches.length > 1) {
+                this.isZooming = true;
+                // 如果正在拖拽，立即停止并重置
+                if (this.isDragging) {
+                    this.isDragging = false;
+                    this.touchDirection = null;
+                    this.updatePosition(true);
+                }
+                return; // 缩放时不处理轮播
+            }
+            
+            // 单指触摸，正常处理
+            if (this.isTransitioning || this.isZooming) return;
             this.touchStartX = e.touches[0].clientX;
             this.touchStartY = e.touches[0].clientY;
             this.touchCurrentX = this.touchStartX;
@@ -370,7 +384,19 @@ class ImageCarousel {
         }, { passive: true });
         
         this.wrapper.addEventListener('touchmove', (e) => {
-            if (!this.isDragging || this.isTransitioning) return;
+            // 检测双指触摸（缩放手势）
+            if (e.touches.length > 1) {
+                this.isZooming = true;
+                // 如果正在拖拽，立即停止并重置
+                if (this.isDragging) {
+                    this.isDragging = false;
+                    this.touchDirection = null;
+                    this.updatePosition(true);
+                }
+                return; // 缩放时不处理轮播
+            }
+            
+            if (!this.isDragging || this.isTransitioning || this.isZooming) return;
             
             this.touchCurrentX = e.touches[0].clientX;
             const currentY = e.touches[0].clientY;
@@ -413,6 +439,27 @@ class ImageCarousel {
         }, { passive: false });
         
         this.wrapper.addEventListener('touchend', (e) => {
+            // 检测是否还有触摸点（可能仍在缩放）
+            if (e.touches.length > 0) {
+                // 仍有触摸点，可能是从双指变为单指，继续缩放状态
+                this.isZooming = true;
+                if (this.isDragging) {
+                    this.isDragging = false;
+                    this.touchDirection = null;
+                    this.updatePosition(true);
+                }
+                return;
+            }
+            
+            // 所有触摸点都离开
+            // 如果之前正在缩放，缩放结束后重置位置
+            if (this.isZooming) {
+                this.isZooming = false;
+                // 缩放结束后，确保轮播位置正确
+                this.updatePosition(false);
+                return;
+            }
+            
             if (!this.isDragging) {
                 // 如果已经不在拖拽状态，确保位置正确
                 this.updatePosition(false);
@@ -444,10 +491,34 @@ class ImageCarousel {
             this.touchDirection = null; // 重置方向
         }, { passive: true });
         
-        this.wrapper.addEventListener('touchcancel', () => {
+        this.wrapper.addEventListener('touchcancel', (e) => {
+            // 触摸取消时，重置所有状态
             this.isDragging = false;
             this.touchDirection = null;
+            this.isZooming = false;
             this.updatePosition(true);
+        }, { passive: true });
+        
+        // 监听全局触摸事件，检测缩放手势
+        document.addEventListener('touchstart', (e) => {
+            // 如果触摸在轮播容器内，且是双指触摸，标记为缩放
+            if (this.wrapper.contains(e.target) && e.touches.length > 1) {
+                this.isZooming = true;
+                if (this.isDragging) {
+                    this.isDragging = false;
+                    this.touchDirection = null;
+                    this.updatePosition(true);
+                }
+            }
+        }, { passive: true });
+        
+        document.addEventListener('touchend', (e) => {
+            // 如果所有触摸点都离开，重置缩放状态
+            if (e.touches.length === 0 && this.isZooming) {
+                this.isZooming = false;
+                // 缩放结束后，确保轮播位置正确
+                this.updatePosition(false);
+            }
         }, { passive: true });
         
         // 监听全局触摸事件，防止页面滚动时拖拽状态未重置
@@ -507,6 +578,11 @@ class ImageCarousel {
         this.updatePosition(true);
     }
     updatePosition(animate) {
+        // 如果正在缩放，不更新位置（除非是动画恢复）
+        if (this.isZooming && !animate) {
+            return;
+        }
+        
         // 确保拖拽状态已重置
         if (!animate) {
             this.isDragging = false;

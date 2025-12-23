@@ -827,6 +827,11 @@ body {
         height: 24px;
     }
     
+    /* 移动端隐藏音量滑块，使用系统音量键控制 */
+    .volume-control {
+        display: none !important;
+    }
+    
     /* 模态框 */
     .modal-content {
         width: 95%;

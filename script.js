@@ -1011,6 +1011,18 @@ class MusicPlayer {
         window.musicPlayer = this;
         this.renderList();
         
+        // 检测移动端，移动端使用系统音量键控制，设置音量为100%
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile) {
+            this.audio.volume = 1.0; // 移动端设置为100%，让系统音量键完全控制
+        } else {
+            // PC端使用滑块控制，设置初始音量（从滑块默认值70%）
+            const volumeBar = document.getElementById('volumeBar');
+            if (volumeBar) {
+                this.audio.volume = volumeBar.value / 100;
+            }
+        }
+        
         this.playBtn.addEventListener('click', () => this.toggle());
         document.getElementById('prevSongBtn').onclick = () => this.skip(-1);
         document.getElementById('nextSongBtn').onclick = () => this.skip(1);
@@ -1034,7 +1046,29 @@ class MusicPlayer {
             this.audio.currentTime = time;
         };
         
-        document.getElementById('volumeBar').oninput = (e) => this.audio.volume = e.target.value / 100;
+        // PC端音量滑块控制（移动端滑块已隐藏）
+        const volumeBar = document.getElementById('volumeBar');
+        if (volumeBar) {
+            volumeBar.oninput = (e) => {
+                if (!isMobile) { // 只在PC端响应滑块变化
+                    this.audio.volume = e.target.value / 100;
+                }
+            };
+        }
+        
+        // 监听窗口大小变化，处理屏幕旋转等情况
+        window.addEventListener('resize', () => {
+            const currentIsMobile = window.innerWidth <= 768;
+            if (currentIsMobile) {
+                // 切换到移动端：设置音量为100%，让系统音量键控制
+                this.audio.volume = 1.0;
+            } else {
+                // 切换到PC端：恢复滑块控制
+                if (volumeBar) {
+                    this.audio.volume = volumeBar.value / 100;
+                }
+            }
+        });
         
         // 监听语言变化，更新"未选择歌曲"文本
         window.addEventListener('languageChanged', () => {

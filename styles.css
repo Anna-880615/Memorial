@@ -898,8 +898,9 @@ body {
 }
 
 /* 移动设备优化（手机和平板） */
-@media (max-width: 1024px) {
-    /* 手机和平板端隐藏音量滑块，使用系统音量键控制 */
+/* 使用触摸设备检测，确保所有触摸设备（包括平板横屏）都隐藏音量滑块 */
+@media (pointer: coarse), (hover: none) {
+    /* 触摸设备（手机和平板，无论横屏竖屏）隐藏音量滑块，使用系统音量键控制 */
     .volume-control {
         display: none !important;
     }

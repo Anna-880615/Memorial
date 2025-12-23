@@ -1232,8 +1232,9 @@ class MusicPlayer {
             
             if (width <= 480) {
                 return 'mobile'; // 手机（≤480px + 触摸）
-            } else if (width <= 1024) {
-                return 'tablet'; // 平板（481px-1024px + 触摸）
+            } else if (width <= 1366) {
+                // 平板（481px-1366px + 触摸），包括 iPad Pro 横屏（1366px）
+                return 'tablet';
             } else {
                 return 'desktop'; // 大屏触摸设备 = 触摸屏PC
             }

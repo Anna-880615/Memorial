@@ -275,7 +275,54 @@ class ImageCarousel {
         this.touchDirection = null; // 将 touchDirection 作为实例变量
         this.isZooming = false; // 是否正在缩放
         this.threshold = 50; // 滑动阈值
+        
+        // 设备检测和图片路径配置
+        this.isMobile = this.detectMobileDevice();
+        this.imageBasePath = this.isMobile ? 'images/mobile/' : 'images/';
+        this.imageExtension = 'JPG'; // 图片扩展名
+        
+        // 初始化时加载对应设备的图片
+        this.loadDeviceSpecificImages();
         this.init();
+    }
+    
+    /**
+     * 检测是否为移动设备
+     */
+    detectMobileDevice() {
+        const width = window.innerWidth;
+        const isTouch = 'ontouchstart' in window || 
+                      navigator.maxTouchPoints > 0 || 
+                      navigator.msMaxTouchPoints > 0;
+        
+        // 移动设备：触摸设备且宽度 <= 1024px
+        return isTouch && width <= 1024;
+    }
+    
+    /**
+     * 根据设备类型加载对应的图片
+     * PC端：images/1.JPG 到 images/30.JPG（按顺序）
+     * 移动端：images/mobile/1.JPG 到 images/mobile/30.JPG（按顺序）
+     */
+    loadDeviceSpecificImages() {
+        if (!this.slides || this.slides.length === 0) return;
+        
+        // 更新所有图片的src
+        this.slides.forEach((slide, index) => {
+            const img = slide.querySelector('img');
+            if (img) {
+                // 直接使用索引+1作为图片编号（1-30）
+                const imageNumber = index + 1;
+                const newSrc = `${this.imageBasePath}${imageNumber}.${this.imageExtension}`;
+                
+                // 如果图片路径改变，更新src
+                const newUrl = new URL(newSrc, window.location.href).href;
+                if (img.src !== newUrl) {
+                    img.src = newSrc;
+                    img.alt = `${this.isMobile ? '移动端' : 'PC端'}照片${imageNumber}`;
+                }
+            }
+        });
     }
     init() {
         if(!this.wrapper) return;
@@ -291,8 +338,40 @@ class ImageCarousel {
         this.setupScrollListener();
         // 监听轮播容器可见性，当重新进入视口时恢复状态
         this.setupVisibilityObserver();
+        // 监听屏幕旋转和窗口大小变化，重新加载图片
+        this.setupResizeListener();
         // 自动播放
         this.autoPlayTimer = setInterval(() => { if(!this.isTransitioning && !this.isDragging) this.move(1); }, 5000);
+    }
+    
+    /**
+     * 监听屏幕旋转和窗口大小变化
+     */
+    setupResizeListener() {
+        let resizeTimeout;
+        const handleResize = () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                const wasMobile = this.isMobile;
+                this.isMobile = this.detectMobileDevice();
+                
+                // 如果设备类型发生变化（例如从PC切换到移动端，或屏幕旋转），重新加载图片
+                if (wasMobile !== this.isMobile) {
+                    this.imageBasePath = this.isMobile ? 'images/mobile/' : 'images/';
+                    this.loadDeviceSpecificImages();
+                    // 重新初始化轮播（因为图片可能改变了）
+                    this.slides = document.querySelectorAll('.carousel-slide');
+                    this.slideCount = this.slides.length;
+                    this.cloneSlides();
+                    this.setupIndicators();
+                    this.currentIndex = 1;
+                    this.updatePosition(false);
+                }
+            }, 300); // 防抖300ms
+        };
+        
+        window.addEventListener('resize', handleResize);
+        window.addEventListener('orientationchange', handleResize);
     }
     
     setupScrollListener() {

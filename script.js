@@ -29,7 +29,10 @@ class LanguageManager {
                 'notice.section4.title': '4. 版权声明', 'notice.section4.content': '部分MV作品是从YouTube下载的，原创者如果觉得不妥，可以联系我，我会及时删除。',
                 'notice.section5.title': '5. 征集投稿', 'notice.section5.content': '我手里的资源十分有限，在这里诚心征集更多网友们的投稿，图片、视频等不限，我希望能够合力将这个网站做得更好。',
                 'notice.section6.title': '6. 联系方式', 'notice.section6.content': '以下是我的联系方式，如果有投稿请发送到我的邮箱，谢谢大家！',
-                'notice.email.label': '邮箱：'
+                'notice.email.label': '邮箱：',
+                'footer.copyright': '© 2025 于朦胧纪念网站 | Alan Yu Memorial Website',
+                'footer.license': '本网站仅供纪念用途，禁止商业使用',
+                'footer.notice': '本站为非营利性纪念网站，所有内容仅供纪念使用'
             },
             en: {
                 'nav.about': 'About', 'nav.works': 'Works', 'nav.mv': 'MV', 'nav.music': 'Music',
@@ -57,7 +60,10 @@ class LanguageManager {
                 'notice.section4.title': '4. Copyright Notice', 'notice.section4.content': 'Some content is from YouTube. Contact me for removal if inappropriate.',
                 'notice.section5.title': '5. Content Submission', 'notice.section5.content': 'I welcome submissions from fans to make this website better.',
                 'notice.section6.title': '6. Contact Information', 'notice.section6.content': 'Please send submissions to my email below.',
-                'notice.email.label': 'Email: '
+                'notice.email.label': 'Email: ',
+                'footer.copyright': '© 2025 于朦胧纪念网站 | Alan Yu Memorial Website',
+                'footer.license': 'This website is for memorial purposes only. Commercial use is prohibited',
+                'footer.notice': 'This is a non-profit memorial website. All content is for memorial use only'
             }
         };
         this.init();

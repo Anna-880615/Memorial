@@ -31,8 +31,7 @@ class LanguageManager {
                 'notice.section6.title': '6. 联系方式', 'notice.section6.content': '以下是我的联系方式，如果有投稿请发送到我的邮箱，谢谢大家！',
                 'notice.email.label': '邮箱：',
                 'footer.copyright': '© 2025 于朦胧纪念网站 | Alan Yu Memorial Website',
-                'footer.license': '本网站仅供纪念用途，禁止商业使用',
-                'footer.notice': '本站为非营利性纪念网站，所有内容仅供纪念使用'
+                'footer.license': '本网站为非营利性纪念网站，仅供纪念用途'
             },
             en: {
                 'nav.about': 'About', 'nav.works': 'Works', 'nav.mv': 'MV', 'nav.music': 'Music',
@@ -62,8 +61,7 @@ class LanguageManager {
                 'notice.section6.title': '6. Contact Information', 'notice.section6.content': 'Please send submissions to my email below.',
                 'notice.email.label': 'Email: ',
                 'footer.copyright': '© 2025 于朦胧纪念网站 | Alan Yu Memorial Website',
-                'footer.license': 'This website is for memorial purposes only. Commercial use is prohibited',
-                'footer.notice': 'This is a non-profit memorial website. All content is for memorial use only'
+                'footer.license': 'This is a non-profit memorial website, for memorial purposes only'
             }
         };
         this.init();

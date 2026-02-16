@@ -1,6 +1,6 @@
 // 管理员登录API
-import { generateAdminToken, verifyAdminPassword } from "../utils/auth.js";
-import { setCorsHeaders, checkRateLimit, getClientIp } from "../utils/cors.js";
+import { generateAdminToken, verifyAdminPassword } from "../../lib/auth.js";
+import { setCorsHeaders, checkRateLimit, getClientIp } from "../../lib/cors.js";
 
 export default async function handler(req, res) {
   setCorsHeaders(req, res, {

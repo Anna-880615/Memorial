@@ -1,7 +1,7 @@
-import { extractAdminToken, verifyAdminToken } from "../utils/auth.js";
-import { validateText, validateInteger } from "../utils/validation.js";
-import { setCorsHeaders, checkRateLimit, getClientIp } from "../utils/cors.js";
-import { getSupabase } from "../utils/supabase.js";
+import { extractAdminToken, verifyAdminToken } from "../../lib/auth.js";
+import { validateText, validateInteger } from "../../lib/validation.js";
+import { setCorsHeaders, checkRateLimit, getClientIp } from "../../lib/cors.js";
+import { getSupabase } from "../../lib/supabase.js";
 
 export default async function handler(req, res) {
   setCorsHeaders(req, res, {

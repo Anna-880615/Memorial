@@ -1,10 +1,10 @@
 import {
   validateIpAddress,
   validateTimezoneOffset,
-} from "../utils/validation.js";
-import { setCorsHeaders, getValidatedClientIp } from "../utils/cors.js";
-import { getSupabase } from "../utils/supabase.js";
-import { getUserLocalDate } from "../utils/date.js";
+} from "../../lib/validation.js";
+import { setCorsHeaders, getValidatedClientIp } from "../../lib/cors.js";
+import { getSupabase } from "../../lib/supabase.js";
+import { getUserLocalDate } from "../../lib/date.js";
 
 export default async function handler(req, res) {
   setCorsHeaders(req, res, { methods: "GET, OPTIONS" });

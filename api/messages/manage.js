@@ -1,11 +1,8 @@
 // 留言管理API（审核、删除）
-import { createClient } from "@supabase/supabase-js";
 import { extractAdminToken, verifyAdminToken } from "../utils/auth.js";
 import { validateMessageId } from "../utils/validation.js";
 import { setCorsHeaders } from "../utils/cors.js";
-
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+import { getSupabase } from "../utils/supabase.js";
 
 export default async function handler(req, res) {
   setCorsHeaders(req, res, {
@@ -17,11 +14,9 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  if (!supabaseUrl || !supabaseKey) {
-    return res.status(500).json({
-      success: false,
-      error: "服务器配置错误，请检查环境变量",
-    });
+  const { client: supabase, error: configError } = getSupabase();
+  if (configError) {
+    return res.status(500).json({ success: false, error: configError });
   }
 
   // 验证管理员权限
@@ -32,8 +27,6 @@ export default async function handler(req, res) {
       error: "需要管理员权限",
     });
   }
-
-  const supabase = createClient(supabaseUrl, supabaseKey);
   const { id, action } = req.body;
 
   // 验证留言ID

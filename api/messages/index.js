@@ -1,10 +1,7 @@
-import { createClient } from "@supabase/supabase-js";
 import { extractAdminToken, verifyAdminToken } from "../utils/auth.js";
 import { validateText, validateInteger } from "../utils/validation.js";
 import { setCorsHeaders, checkRateLimit, getClientIp } from "../utils/cors.js";
-
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+import { getSupabase } from "../utils/supabase.js";
 
 export default async function handler(req, res) {
   setCorsHeaders(req, res, {
@@ -16,14 +13,10 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  if (!supabaseUrl || !supabaseKey) {
-    return res.status(500).json({
-      success: false,
-      error: "服务器配置错误，请检查环境变量",
-    });
+  const { client: supabase, error: configError } = getSupabase();
+  if (configError) {
+    return res.status(500).json({ success: false, error: configError });
   }
-
-  const supabase = createClient(supabaseUrl, supabaseKey);
 
   if (req.method === "GET") {
     // 获取留言列表

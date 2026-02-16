@@ -1,13 +1,11 @@
-import { createClient } from "@supabase/supabase-js";
 import {
   validateIpAddress,
   validateFlowerCount,
   validateTimezoneOffset,
 } from "../utils/validation.js";
-import { setCorsHeaders } from "../utils/cors.js";
-
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+import { setCorsHeaders, getValidatedClientIp } from "../utils/cors.js";
+import { getSupabase } from "../utils/supabase.js";
+import { getUserLocalDate } from "../utils/date.js";
 
 export default async function handler(req, res) {
   setCorsHeaders(req, res, {
@@ -23,41 +21,23 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  if (!supabaseUrl || !supabaseKey) {
-    return res.status(500).json({
-      success: false,
-      message: "服务器配置错误，请检查环境变量",
-    });
+  const { client: supabase, error: configError } = getSupabase();
+  if (configError) {
+    return res.status(500).json({ success: false, error: configError });
   }
 
-  const supabase = createClient(supabaseUrl, supabaseKey);
-
-  // 获取并验证用户 IP 地址
-  // 优先使用 Vercel 平台设置的可信头（不可被客户端伪造）
-  let userIp = "unknown";
-  if (req.headers["x-vercel-forwarded-for"]) {
-    const rawIp = req.headers["x-vercel-forwarded-for"].split(",")[0].trim();
-    userIp = validateIpAddress(rawIp) || "unknown";
-  } else if (req.headers["x-forwarded-for"]) {
-    const rawIp = req.headers["x-forwarded-for"].split(",")[0].trim();
-    userIp = validateIpAddress(rawIp) || "unknown";
-  } else if (req.headers["x-real-ip"]) {
-    userIp = validateIpAddress(req.headers["x-real-ip"]) || "unknown";
-  } else if (req.connection?.remoteAddress) {
-    userIp = validateIpAddress(req.connection.remoteAddress) || "unknown";
-  } else if (req.socket?.remoteAddress) {
-    userIp = validateIpAddress(req.socket.remoteAddress) || "unknown";
-  }
-
-  // 如果IP验证失败，使用默认值（但记录警告）
+  const userIp = getValidatedClientIp(req, validateIpAddress);
   if (userIp === "unknown") {
     console.warn("无法获取有效的用户IP地址");
+  }
+
+  if (!req.body) {
+    return res.status(400).json({ success: false, error: "请求体不能为空" });
   }
 
   const { count } = req.body;
 
   try {
-    // 验证送花数量
     const validatedCount = validateFlowerCount(count);
     if (!validatedCount) {
       return res.status(400).json({
@@ -66,11 +46,9 @@ export default async function handler(req, res) {
       });
     }
 
-    // 验证并获取用户时区偏移（前端传递的是 -getTimezoneOffset()）
     const timezoneOffset = validateTimezoneOffset(
       req.headers["x-timezone-offset"],
     );
-
     if (timezoneOffset === null) {
       return res.status(400).json({
         success: false,
@@ -78,51 +56,21 @@ export default async function handler(req, res) {
       });
     }
 
-    // 重要：基于用户本地时间计算日期
-    // 使用当前UTC时间 + 时区偏移 = 用户本地时间
-    const now = new Date();
-    const userLocalTime = new Date(now.getTime() + timezoneOffset * 60000);
-    const year = userLocalTime.getUTCFullYear();
-    const month = String(userLocalTime.getUTCMonth() + 1).padStart(2, "0");
-    const day = String(userLocalTime.getUTCDate()).padStart(2, "0");
-    const today = `${year}-${month}-${day}`;
-
+    const today = getUserLocalDate(timezoneOffset);
     const maxPerDay = 21;
 
-    // 检查今日已送数量
-    // 重要：需要基于用户本地时间查询，而不是简单的 date 字段匹配
-    // 因为不同时区的用户可能有不同的"今天"
-    const { data: allUserRecords, error: fetchError } = await supabase
+    // 在数据库层面按 date 字段过滤，只查询今天该 IP 的记录
+    const { data: todayRecords, error: fetchError } = await supabase
       .from("flower_records")
-      .select("flower_count, created_at")
-      .eq("user_ip", userIp);
+      .select("flower_count")
+      .eq("user_ip", userIp)
+      .eq("date", today);
 
     if (fetchError) throw fetchError;
 
-    // 基于用户本地时间计算今日已送数量
-    let todayCount = 0;
-    if (allUserRecords) {
-      todayCount = allUserRecords
-        .filter((record) => {
-          if (!record.created_at) return false;
-          // 将UTC时间戳转换为用户本地时间，然后判断日期
-          const recordDate = new Date(record.created_at);
-          const recordLocalTime = new Date(
-            recordDate.getTime() + timezoneOffset * 60000,
-          );
-          const recordYear = recordLocalTime.getUTCFullYear();
-          const recordMonth = String(
-            recordLocalTime.getUTCMonth() + 1,
-          ).padStart(2, "0");
-          const recordDay = String(recordLocalTime.getUTCDate()).padStart(
-            2,
-            "0",
-          );
-          const recordDateStr = `${recordYear}-${recordMonth}-${recordDay}`;
-          return recordDateStr === today;
-        })
-        .reduce((sum, r) => sum + r.flower_count, 0);
-    }
+    const todayCount = todayRecords
+      ? todayRecords.reduce((sum, r) => sum + r.flower_count, 0)
+      : 0;
 
     if (todayCount + validatedCount > maxPerDay) {
       return res.status(400).json({
@@ -132,20 +80,19 @@ export default async function handler(req, res) {
     }
 
     // 插入送花记录
-    // date 字段存储基于用户本地时间计算的日期（用于快速查询和统计）
     const { error: insertError } = await supabase
       .from("flower_records")
       .insert([
         {
           user_ip: userIp,
-          flower_count: validatedCount, // 使用验证后的数量
-          date: today, // 基于用户本地时间计算的日期
+          flower_count: validatedCount,
+          date: today,
         },
       ]);
 
     if (insertError) throw insertError;
 
-    // 获取更新后的总数
+    // 查询送花总数（只查 flower_count 列，减少数据传输）
     const { data: totalData, error: totalError } = await supabase
       .from("flower_records")
       .select("flower_count");
@@ -160,7 +107,7 @@ export default async function handler(req, res) {
       total: total,
     });
   } catch (error) {
-    console.error("送花失败:", error);
+    console.error("送花失败:", error.message);
     return res.status(500).json({
       success: false,
       message: "送花失败，请稍后重试",

@@ -1,26 +1,22 @@
-import { createClient } from "@supabase/supabase-js";
 import { setCorsHeaders } from "../utils/cors.js";
-
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+import { getSupabase } from "../utils/supabase.js";
 
 export default async function handler(req, res) {
   setCorsHeaders(req, res, { methods: "GET, OPTIONS" });
-  // 添加 HTTP 缓存头：总送花数变化不频繁，缓存60秒
   res.setHeader("Cache-Control", "public, max-age=60");
+
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
 
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  if (!supabaseUrl || !supabaseKey) {
-    return res.status(500).json({
-      success: false,
-      total: 0,
-    });
+  const { client: supabase, error: configError } = getSupabase();
+  if (configError) {
+    return res.status(500).json({ success: false, total: 0 });
   }
-
-  const supabase = createClient(supabaseUrl, supabaseKey);
 
   try {
     const { data, error } = await supabase
@@ -36,7 +32,7 @@ export default async function handler(req, res) {
       total: total,
     });
   } catch (error) {
-    console.error("获取总送花数失败:", error);
+    console.error("获取总送花数失败:", error.message);
     return res.status(500).json({
       success: false,
       total: 0,

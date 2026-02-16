@@ -779,7 +779,7 @@ class ImageCarousel {
           const deltaY = Math.abs(currentY - scrollStartY);
           if (deltaY > 10) {
             this.isDragging = false;
-            touchDirection = null;
+            this.touchDirection = null;
             this.updatePosition(true);
           }
         }
@@ -1435,13 +1435,7 @@ class MediaPlayer {
       videoUrl = CONFIG.SUPABASE_STORAGE_URL + fileName;
     }
 
-    // 加上时间戳防止缓存
-    const timestamp = new Date().getTime();
-    const src = videoUrl.includes("?")
-      ? `${videoUrl}&t=${timestamp}`
-      : `${videoUrl}?t=${timestamp}`;
-
-    this.video.src = src;
+    this.video.src = videoUrl;
     if (this.title) this.title.textContent = mv.name;
 
     // 高亮当前播放项
@@ -1651,13 +1645,7 @@ class MusicPlayer {
     this.index = i;
     const song = this.songs[i];
 
-    // 加上时间戳
-    const timestamp = new Date().getTime();
-    const src = song.src.includes("?")
-      ? `${song.src}&t=${timestamp}`
-      : `${song.src}?t=${timestamp}`;
-
-    this.audio.src = src;
+    this.audio.src = song.src;
     const currentSongNameEl = document.getElementById("currentSongName");
     currentSongNameEl.textContent = song.name;
     // 移除 data-i18n 属性，因为现在显示的是歌曲名称，不是翻译文本

@@ -83,7 +83,7 @@ export function checkRateLimit(key, maxRequests, windowMs) {
 }
 
 /**
- * 获取客户端 IP（优先使用 Vercel 可信头）
+ * 获取客户端原始 IP（优先使用 Vercel 可信头）
  * @param {object} req - 请求对象
  * @returns {string} - IP 地址
  */
@@ -100,4 +100,15 @@ export function getClientIp(req) {
   return (
     req.connection?.remoteAddress || req.socket?.remoteAddress || "unknown"
   );
+}
+
+/**
+ * 获取经过验证的客户端 IP（带格式校验）
+ * @param {object} req - 请求对象
+ * @param {function} validateIpAddress - IP 验证函数
+ * @returns {string} - 验证后的 IP 地址，验证失败返回 'unknown'
+ */
+export function getValidatedClientIp(req, validateIpAddress) {
+  const rawIp = getClientIp(req);
+  return validateIpAddress(rawIp) || "unknown";
 }

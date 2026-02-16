@@ -9,33 +9,35 @@
  * @returns {string|null} - 清理后的IP地址或null
  */
 export function validateIpAddress(ip) {
-  if (!ip || typeof ip !== 'string') {
+  if (!ip || typeof ip !== "string") {
     return null;
   }
-  
+
   // 移除所有非IP地址字符（只允许数字、点、冒号、方括号）
-  const cleaned = ip.trim().replace(/[^0-9.:\[\]]/g, '');
-  
+  const cleaned = ip.trim().replace(/[^0-9.:\[\]]/g, "");
+
   // IPv4格式验证：xxx.xxx.xxx.xxx（每个段0-255）
   const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
   // IPv6格式验证（简化版）
   const ipv6Regex = /^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$/;
-  
+
   if (ipv4Regex.test(cleaned)) {
     // 验证IPv4每个段是否在0-255范围内
-    const parts = cleaned.split('.');
-    if (parts.every(part => {
-      const num = parseInt(part, 10);
-      return num >= 0 && num <= 255;
-    })) {
+    const parts = cleaned.split(".");
+    if (
+      parts.every((part) => {
+        const num = parseInt(part, 10);
+        return num >= 0 && num <= 255;
+      })
+    ) {
       return cleaned;
     }
   }
-  
+
   if (ipv6Regex.test(cleaned)) {
     return cleaned;
   }
-  
+
   // 如果都不匹配，返回null
   return null;
 }
@@ -51,24 +53,24 @@ export function validateInteger(value, min = null, max = null) {
   if (value === null || value === undefined) {
     return null;
   }
-  
+
   // 转换为整数
   const num = parseInt(value, 10);
-  
+
   // 检查是否为有效数字
   if (isNaN(num) || !isFinite(num)) {
     return null;
   }
-  
+
   // 检查范围
   if (min !== null && num < min) {
     return null;
   }
-  
+
   if (max !== null && num > max) {
     return null;
   }
-  
+
   return num;
 }
 
@@ -78,33 +80,35 @@ export function validateInteger(value, min = null, max = null) {
  * @returns {string|null} - 验证后的日期字符串或null
  */
 export function validateDateString(dateStr) {
-  if (!dateStr || typeof dateStr !== 'string') {
+  if (!dateStr || typeof dateStr !== "string") {
     return null;
   }
-  
+
   // 只允许数字和连字符
-  const cleaned = dateStr.trim().replace(/[^0-9-]/g, '');
-  
+  const cleaned = dateStr.trim().replace(/[^0-9-]/g, "");
+
   // 验证格式：YYYY-MM-DD
   const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
   if (!dateRegex.test(cleaned)) {
     return null;
   }
-  
+
   // 验证日期是否有效
-  const date = new Date(cleaned + 'T00:00:00Z');
+  const date = new Date(cleaned + "T00:00:00Z");
   if (isNaN(date.getTime())) {
     return null;
   }
-  
+
   // 确保日期字符串匹配（防止无效日期如 2024-13-45）
-  const [year, month, day] = cleaned.split('-').map(Number);
-  if (date.getUTCFullYear() !== year ||
-      date.getUTCMonth() + 1 !== month ||
-      date.getUTCDate() !== day) {
+  const [year, month, day] = cleaned.split("-").map(Number);
+  if (
+    date.getUTCFullYear() !== year ||
+    date.getUTCMonth() + 1 !== month ||
+    date.getUTCDate() !== day
+  ) {
     return null;
   }
-  
+
   return cleaned;
 }
 
@@ -125,19 +129,19 @@ export function validateTimezoneOffset(value) {
  * @returns {string|null} - 清理后的文本或null
  */
 export function validateText(text, maxLength = 10000) {
-  if (!text || typeof text !== 'string') {
+  if (!text || typeof text !== "string") {
     return null;
   }
-  
+
   // 移除控制字符（保留换行符和制表符）
-  const cleaned = text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
-  
+  const cleaned = text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "");
+
   // 检查长度（使用实际字符数）
   const charCount = Array.from(cleaned).length;
   if (charCount === 0 || charCount > maxLength) {
     return null;
   }
-  
+
   return cleaned.trim();
 }
 
@@ -170,4 +174,3 @@ export function validateLimit(limit) {
   const num = validateInteger(limit, 1, 1000);
   return num || 100; // 默认100
 }
-

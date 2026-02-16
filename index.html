@@ -1,366 +1,586 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>于朦胧 | Alan Yu</title>
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
-    <meta name="description" content="于朦胧纪念网站（A memorial website for Alan Yu）-- 你永远活在我们的心中，不会被遗忘。">
-    <meta name="keywords" content="于朦胧, Alan Yu, 于朦胧纪念网站, 于朦胧音乐, 于朦胧MV, 于朦胧影视, 于朦胧送花">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <meta
+      name="description"
+      content="于朦胧纪念网站（A memorial website for Alan Yu）-- 你永远活在我们的心中，不会被遗忘。"
+    />
+    <meta
+      name="keywords"
+      content="于朦胧, Alan Yu, 于朦胧纪念网站, 于朦胧音乐, 于朦胧MV, 于朦胧影视, 于朦胧送花"
+    />
 
     <!-- Open Graph -->
-    <meta property="og:title" content="于朦胧 | Alan Yu">
-    <meta property="og:description" content="于朦胧（Alan Yu）纪念网站 - 中国内地男演员、歌手、MV导演">
-    <meta property="og:image" content="https://menglong.org//images/1.JPG">
-    <meta property="og:url" content="https://menglong.org/">
+    <meta property="og:title" content="于朦胧 | Alan Yu" />
+    <meta
+      property="og:description"
+      content="于朦胧（Alan Yu）纪念网站 - 中国内地男演员、歌手、MV导演"
+    />
+    <meta property="og:image" content="https://menglong.org//images/1.JPG" />
+    <meta property="og:url" content="https://menglong.org/" />
 
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css" />
     <script src="config.js"></script>
     <script src="api-cache.js"></script>
-</head>
-<body>
+  </head>
+  <body>
     <nav class="top-nav">
-        <div class="nav-container">
-            <div class="nav-logo">
-                <span class="logo-text">于朦胧</span>
-                <span class="logo-text-en">Alan Yu</span>
-            </div>
-            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="菜单">
-                <span class="menu-line"></span>
-                <span class="menu-line"></span>
-                <span class="menu-line"></span>
-            </button>
-            <div class="nav-right" id="navRight">
-                <ul class="nav-menu" id="navMenu">
-                    <li><button class="nav-item" id="navAbout" data-i18n="nav.about">关于</button></li>
-                    <li><button class="nav-item" id="navMusic" data-i18n="nav.music">音乐</button></li>
-                    <li><button class="nav-item" id="navMV" data-i18n="nav.mv">MV</button></li>
-                    <li><button class="nav-item" id="navWorks" data-i18n="nav.works">影视</button></li>
-                    <li><button class="nav-item" id="navFlowers" data-i18n="nav.flowers">送花</button></li>
-                    <li><button class="nav-item" id="navNotice" data-i18n="nav.notice">说明</button></li>
-                </ul>
-                <div class="language-switcher">
-                    <button id="langZh" class="lang-btn active">中文</button>
-                    <button id="langEn" class="lang-btn">English</button>
-                </div>
-            </div>
+      <div class="nav-container">
+        <div class="nav-logo">
+          <span class="logo-text">于朦胧</span>
+          <span class="logo-text-en">Alan Yu</span>
         </div>
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="菜单">
+          <span class="menu-line"></span>
+          <span class="menu-line"></span>
+          <span class="menu-line"></span>
+        </button>
+        <div class="nav-right" id="navRight">
+          <ul class="nav-menu" id="navMenu">
+            <li>
+              <button class="nav-item" id="navAbout" data-i18n="nav.about">
+                关于
+              </button>
+            </li>
+            <li>
+              <button class="nav-item" id="navMusic" data-i18n="nav.music">
+                音乐
+              </button>
+            </li>
+            <li>
+              <button class="nav-item" id="navMV" data-i18n="nav.mv">MV</button>
+            </li>
+            <li>
+              <button class="nav-item" id="navWorks" data-i18n="nav.works">
+                影视
+              </button>
+            </li>
+            <li>
+              <button class="nav-item" id="navFlowers" data-i18n="nav.flowers">
+                送花
+              </button>
+            </li>
+            <li>
+              <button class="nav-item" id="navNotice" data-i18n="nav.notice">
+                说明
+              </button>
+            </li>
+          </ul>
+          <div class="language-switcher">
+            <button id="langZh" class="lang-btn active">中文</button>
+            <button id="langEn" class="lang-btn">English</button>
+          </div>
+        </div>
+      </div>
     </nav>
 
     <main class="main-hero">
-        <div class="hero-overlay">
-            <h1 class="hero-name">
-                <span class="name-chinese">于朦胧</span>
-                <span class="name-english">Alan Yu</span>
-            </h1>
+      <div class="hero-overlay">
+        <h1 class="hero-name">
+          <span class="name-chinese">于朦胧</span>
+          <span class="name-english">Alan Yu</span>
+        </h1>
+      </div>
+      <div class="carousel-container">
+        <div class="carousel-wrapper" id="carouselWrapper">
+          <div class="carousel-slide active">
+            <img src="images/1.JPG" alt="照片1" />
+          </div>
+          <div class="carousel-slide">
+            <img src="images/2.JPG" alt="照片2" />
+          </div>
+          <div class="carousel-slide">
+            <img src="images/3.JPG" alt="照片3" />
+          </div>
+          <div class="carousel-slide">
+            <img src="images/4.JPG" alt="照片4" />
+          </div>
+          <div class="carousel-slide">
+            <img src="images/5.JPG" alt="照片5" />
+          </div>
+          <div class="carousel-slide">
+            <img src="images/6.JPG" alt="照片6" />
+          </div>
+          <div class="carousel-slide">
+            <img src="images/7.JPG" alt="照片7" />
+          </div>
+          <div class="carousel-slide">
+            <img src="images/8.JPG" alt="照片8" />
+          </div>
+          <div class="carousel-slide">
+            <img src="images/9.JPG" alt="照片9" />
+          </div>
+          <div class="carousel-slide">
+            <img src="images/10.JPG" alt="照片10" />
+          </div>
+          <div class="carousel-slide">
+            <img src="images/11.JPG" alt="照片11" />
+          </div>
+          <div class="carousel-slide">
+            <img src="images/12.JPG" alt="照片12" />
+          </div>
+          <div class="carousel-slide">
+            <img src="images/13.JPG" alt="照片13" />
+          </div>
+          <div class="carousel-slide">
+            <img src="images/14.JPG" alt="照片14" />
+          </div>
+          <div class="carousel-slide">
+            <img src="images/15.JPG" alt="照片15" />
+          </div>
+          <div class="carousel-slide">
+            <img src="images/16.JPG" alt="照片16" />
+          </div>
+          <div class="carousel-slide">
+            <img src="images/17.JPG" alt="照片17" />
+          </div>
+          <div class="carousel-slide">
+            <img src="images/18.JPG" alt="照片18" />
+          </div>
+          <div class="carousel-slide">
+            <img src="images/19.JPG" alt="照片19" />
+          </div>
+          <div class="carousel-slide">
+            <img src="images/20.JPG" alt="照片20" />
+          </div>
+          <div class="carousel-slide">
+            <img src="images/21.JPG" alt="照片21" />
+          </div>
+          <div class="carousel-slide">
+            <img src="images/22.JPG" alt="照片22" />
+          </div>
+          <div class="carousel-slide">
+            <img src="images/23.JPG" alt="照片23" />
+          </div>
+          <div class="carousel-slide">
+            <img src="images/24.JPG" alt="照片24" />
+          </div>
+          <div class="carousel-slide">
+            <img src="images/25.JPG" alt="照片25" />
+          </div>
+          <div class="carousel-slide">
+            <img src="images/26.JPG" alt="照片26" />
+          </div>
+          <div class="carousel-slide">
+            <img src="images/27.JPG" alt="照片27" />
+          </div>
+          <div class="carousel-slide">
+            <img src="images/28.JPG" alt="照片28" />
+          </div>
+          <div class="carousel-slide">
+            <img src="images/29.JPG" alt="照片29" />
+          </div>
+          <div class="carousel-slide">
+            <img src="images/30.JPG" alt="照片30" />
+          </div>
         </div>
-        <div class="carousel-container">
-            <div class="carousel-wrapper" id="carouselWrapper">
-                <div class="carousel-slide active"><img src="images/1.JPG" alt="照片1"></div>
-                <div class="carousel-slide"><img src="images/2.JPG" alt="照片2"></div>
-                <div class="carousel-slide"><img src="images/3.JPG" alt="照片3"></div>
-                <div class="carousel-slide"><img src="images/4.JPG" alt="照片4"></div>
-                <div class="carousel-slide"><img src="images/5.JPG" alt="照片5"></div>
-                <div class="carousel-slide"><img src="images/6.JPG" alt="照片6"></div>
-                <div class="carousel-slide"><img src="images/7.JPG" alt="照片7"></div>
-                <div class="carousel-slide"><img src="images/8.JPG" alt="照片8"></div>
-                <div class="carousel-slide"><img src="images/9.JPG" alt="照片9"></div>
-                <div class="carousel-slide"><img src="images/10.JPG" alt="照片10"></div>
-                <div class="carousel-slide"><img src="images/11.JPG" alt="照片11"></div>
-                <div class="carousel-slide"><img src="images/12.JPG" alt="照片12"></div>
-                <div class="carousel-slide"><img src="images/13.JPG" alt="照片13"></div>
-                <div class="carousel-slide"><img src="images/14.JPG" alt="照片14"></div>
-                <div class="carousel-slide"><img src="images/15.JPG" alt="照片15"></div>
-                <div class="carousel-slide"><img src="images/16.JPG" alt="照片16"></div>
-                <div class="carousel-slide"><img src="images/17.JPG" alt="照片17"></div>
-                <div class="carousel-slide"><img src="images/18.JPG" alt="照片18"></div>
-                <div class="carousel-slide"><img src="images/19.JPG" alt="照片19"></div>
-                <div class="carousel-slide"><img src="images/20.JPG" alt="照片20"></div>
-                <div class="carousel-slide"><img src="images/21.JPG" alt="照片21"></div>
-                <div class="carousel-slide"><img src="images/22.JPG" alt="照片22"></div>
-                <div class="carousel-slide"><img src="images/23.JPG" alt="照片23"></div>
-                <div class="carousel-slide"><img src="images/24.JPG" alt="照片24"></div>
-                <div class="carousel-slide"><img src="images/25.JPG" alt="照片25"></div>
-                <div class="carousel-slide"><img src="images/26.JPG" alt="照片26"></div>
-                <div class="carousel-slide"><img src="images/27.JPG" alt="照片27"></div>
-                <div class="carousel-slide"><img src="images/28.JPG" alt="照片28"></div>
-                <div class="carousel-slide"><img src="images/29.JPG" alt="照片29"></div>
-                <div class="carousel-slide"><img src="images/30.JPG" alt="照片30"></div>
-            </div>
-            <button class="carousel-btn prev" id="prevBtn" aria-label="上一张">‹</button>
-            <button class="carousel-btn next" id="nextBtn" aria-label="下一张">›</button>
-            <div class="carousel-indicators" id="indicators"></div>
-            <div class="scroll-hint">
-                <span class="scroll-text">Scroll Down</span>
-                <div class="scroll-arrow"></div>
-            </div>
+        <button class="carousel-btn prev" id="prevBtn" aria-label="上一张">
+          ‹
+        </button>
+        <button class="carousel-btn next" id="nextBtn" aria-label="下一张">
+          ›
+        </button>
+        <div class="carousel-indicators" id="indicators"></div>
+        <div class="scroll-hint">
+          <span class="scroll-text">Scroll Down</span>
+          <div class="scroll-arrow"></div>
         </div>
+      </div>
     </main>
 
     <section class="memorial-section" id="memorialSection">
-        <div class="memorial-header">
-            <h2 class="memorial-title" data-i18n="message.title">纪念留言</h2>
-            <p class="memorial-subtitle" data-i18n="message.subtitle">分享您对朦胧的回忆、思念与感悟</p>
-            
-            <div class="message-input-container">
-                <textarea 
-                    id="messageInput" 
-                    data-i18n-placeholder="message.placeholder"
-                    placeholder="在此输入您的纪念留言..."
-                    rows="1"
-                ></textarea>
-                <div class="message-input-footer">
-                    <span class="message-char-count" id="messageCharCount">0 / 1000</span>
-                    <button id="submitMessage" class="memorial-submit-btn" data-i18n="message.submit">发布</button>
-                </div>
-            </div>
-        </div>
+      <div class="memorial-header">
+        <h2 class="memorial-title" data-i18n="message.title">纪念留言</h2>
+        <p class="memorial-subtitle" data-i18n="message.subtitle">
+          分享您对朦胧的回忆、思念与感悟
+        </p>
 
-        <div class="messages-wrapper">
-            <div class="messages-container" id="messagesWrapper">
-                </div>
-            <div class="messages-fade"></div>
+        <div class="message-input-container">
+          <textarea
+            id="messageInput"
+            data-i18n-placeholder="message.placeholder"
+            placeholder="在此输入您的纪念留言..."
+            rows="1"
+          ></textarea>
+          <div class="message-input-footer">
+            <span class="message-char-count" id="messageCharCount"
+              >0 / 1000</span
+            >
+            <button
+              id="submitMessage"
+              class="memorial-submit-btn"
+              data-i18n="message.submit"
+            >
+              发布
+            </button>
+          </div>
         </div>
+      </div>
+
+      <div class="messages-wrapper">
+        <div class="messages-container" id="messagesWrapper"></div>
+        <div class="messages-fade"></div>
+      </div>
     </section>
 
     <div class="modal" id="aboutModal">
-        <div class="modal-content">
-            <button class="modal-close" id="closeAbout">&times;</button>
-            <div class="modal-body">
-                <div class="intro-content">
-                    <div class="intro-section">
-                        <h2 data-i18n="intro.name">于朦胧</h2>
-                        <p class="dates" data-i18n="intro.dates">(1988年6月15日 - 2025年9月11日)</p>
-                        <p class="bio" data-i18n="intro.bio">出生于新疆乌鲁木齐市，中国内地男演员、歌手、MV导演</p>
-                        <p class="quote" data-i18n="intro.quote">你是一个拥有纯净，善良，正直之心的人，你值得被更多的人喜欢</p>
-                    </div>
-                </div>
+      <div class="modal-content">
+        <button class="modal-close" id="closeAbout">&times;</button>
+        <div class="modal-body">
+          <div class="intro-content">
+            <div class="intro-section">
+              <h2 data-i18n="intro.name">于朦胧</h2>
+              <p class="dates" data-i18n="intro.dates">
+                (1988年6月15日 - 2025年9月11日)
+              </p>
+              <p class="bio" data-i18n="intro.bio">
+                出生于新疆乌鲁木齐市，中国内地男演员、歌手、MV导演
+              </p>
+              <p class="quote" data-i18n="intro.quote">
+                你是一个拥有纯净，善良，正直之心的人，你值得被更多的人喜欢
+              </p>
             </div>
+          </div>
         </div>
+      </div>
     </div>
 
     <div class="modal" id="worksModal">
-        <div class="modal-content modal-large">
-            <button class="modal-close" id="closeWorks">&times;</button>
-            <div class="modal-body">
-                <h2 class="modal-title" data-i18n="works.title">影视作品</h2>
-                <div class="works-grid" id="worksGrid">
-                    </div>
-            </div>
+      <div class="modal-content modal-large">
+        <button class="modal-close" id="closeWorks">&times;</button>
+        <div class="modal-body">
+          <h2 class="modal-title" data-i18n="works.title">影视作品</h2>
+          <div class="works-grid" id="worksGrid"></div>
         </div>
+      </div>
     </div>
 
     <div class="modal" id="mvModal">
-        <div class="modal-content modal-large">
-            <button class="modal-close" id="closeMV">&times;</button>
-            <div class="modal-body">
-                <h2 class="modal-title" data-i18n="media.title">MV作品</h2>
-                <div class="mv-container">
-                    <div class="mv-player-section">
-                        <div class="mv-current-info">
-                            <h3 class="mv-current-title" id="mvCurrentTitle"></h3>
-                        </div>
-                        <div class="media-player">
-                            <video id="videoPlayer" class="video-player" controls preload="auto" playsinline>
-                                <p data-i18n="media.noVideo">您的浏览器不支持视频播放</p>
-                            </video>
-                        </div>
-                    </div>
-                    <div class="mv-list-section">
-                        <h4 class="mv-list-title" data-i18n="media.playlist">MV列表</h4>
-                        <ul class="mv-list" id="mvList"></ul>
-                    </div>
-                </div>
+      <div class="modal-content modal-large">
+        <button class="modal-close" id="closeMV">&times;</button>
+        <div class="modal-body">
+          <h2 class="modal-title" data-i18n="media.title">MV作品</h2>
+          <div class="mv-container">
+            <div class="mv-player-section">
+              <div class="mv-current-info">
+                <h3 class="mv-current-title" id="mvCurrentTitle"></h3>
+              </div>
+              <div class="media-player">
+                <video
+                  id="videoPlayer"
+                  class="video-player"
+                  controls
+                  preload="auto"
+                  playsinline
+                >
+                  <p data-i18n="media.noVideo">您的浏览器不支持视频播放</p>
+                </video>
+              </div>
             </div>
+            <div class="mv-list-section">
+              <h4 class="mv-list-title" data-i18n="media.playlist">MV列表</h4>
+              <ul class="mv-list" id="mvList"></ul>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
 
     <div class="modal" id="musicModal">
-        <div class="modal-content modal-large">
-            <button class="modal-close" id="closeMusic">&times;</button>
-            <div class="modal-body">
-                <h2 class="modal-title" data-i18n="music.title">音乐作品</h2>
-                <div class="music-player">
-                    <div class="vinyl-player-container">
-                        <div class="vinyl-player">
-                            <div class="turntable-platter">
-                                <div class="vinyl-disc" id="vinylDisc">
-                                    <div class="vinyl-grooves"></div>
-                                    <div class="vinyl-center">
-                                        <div class="album-cover" id="albumCover">
-                                            <img id="albumCoverImg" src="images/covers/initial.png" alt="专辑封面">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="music-info-vinyl">
-                            <p class="current-song-vinyl" id="currentSongName" data-i18n="music.noSong">未选择歌曲</p>
-                            <p class="song-time-vinyl" id="songTime">00:00 / 00:00</p>
-                        </div>
+      <div class="modal-content modal-large">
+        <button class="modal-close" id="closeMusic">&times;</button>
+        <div class="modal-body">
+          <h2 class="modal-title" data-i18n="music.title">音乐作品</h2>
+          <div class="music-player">
+            <div class="vinyl-player-container">
+              <div class="vinyl-player">
+                <div class="turntable-platter">
+                  <div class="vinyl-disc" id="vinylDisc">
+                    <div class="vinyl-grooves"></div>
+                    <div class="vinyl-center">
+                      <div class="album-cover" id="albumCover">
+                        <img
+                          id="albumCoverImg"
+                          src="images/covers/initial.png"
+                          alt="专辑封面"
+                        />
+                      </div>
                     </div>
-                    
-                    <div class="music-controls-vinyl">
-                        <button id="prevSongBtn" class="control-btn-vinyl prev-btn" data-i18n-title="music.prev"></button>
-                        <button id="playPauseBtn" class="control-btn-vinyl play-pause-btn-vinyl" data-i18n-title="music.play">
-                            <svg class="play-icon" viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
-                                <path d="M8 5v14l11-7z"/>
-                            </svg>
-                            <svg class="pause-icon" viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
-                                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-                            </svg>
-                        </button>
-                        <button id="nextSongBtn" class="control-btn-vinyl next-btn" data-i18n-title="music.next"></button>
-                    </div>
-                    
-                    <div class="progress-container">
-                        <div class="progress-bar-wrapper">
-                            <input type="range" id="progressBar" class="progress-bar" min="0" max="100" value="0">
-                        </div>
-                    </div>
-                    
-                    <div class="volume-control">
-                        <span data-i18n="music.volume">音量</span>
-                        <input type="range" id="volumeBar" class="volume-bar" min="0" max="100" value="70">
-                    </div>
-                    
-                    <audio id="audioPlayer" preload="auto"></audio>
-                    
-                    <div class="playlist">
-                        <h4 data-i18n="music.playlist">歌曲列表</h4>
-                        <ul id="playlist" class="song-list"></ul>
-                    </div>
+                  </div>
                 </div>
+              </div>
+              <div class="music-info-vinyl">
+                <p
+                  class="current-song-vinyl"
+                  id="currentSongName"
+                  data-i18n="music.noSong"
+                >
+                  未选择歌曲
+                </p>
+                <p class="song-time-vinyl" id="songTime">00:00 / 00:00</p>
+              </div>
             </div>
+
+            <div class="music-controls-vinyl">
+              <button
+                id="prevSongBtn"
+                class="control-btn-vinyl prev-btn"
+                data-i18n-title="music.prev"
+              ></button>
+              <button
+                id="playPauseBtn"
+                class="control-btn-vinyl play-pause-btn-vinyl"
+                data-i18n-title="music.play"
+              >
+                <svg
+                  class="play-icon"
+                  viewBox="0 0 24 24"
+                  width="28"
+                  height="28"
+                  fill="currentColor"
+                >
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+                <svg
+                  class="pause-icon"
+                  viewBox="0 0 24 24"
+                  width="28"
+                  height="28"
+                  fill="currentColor"
+                >
+                  <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                </svg>
+              </button>
+              <button
+                id="nextSongBtn"
+                class="control-btn-vinyl next-btn"
+                data-i18n-title="music.next"
+              ></button>
+            </div>
+
+            <div class="progress-container">
+              <div class="progress-bar-wrapper">
+                <input
+                  type="range"
+                  id="progressBar"
+                  class="progress-bar"
+                  min="0"
+                  max="100"
+                  value="0"
+                />
+              </div>
+            </div>
+
+            <div class="volume-control">
+              <span data-i18n="music.volume">音量</span>
+              <input
+                type="range"
+                id="volumeBar"
+                class="volume-bar"
+                min="0"
+                max="100"
+                value="70"
+              />
+            </div>
+
+            <audio id="audioPlayer" preload="auto"></audio>
+
+            <div class="playlist">
+              <h4 data-i18n="music.playlist">歌曲列表</h4>
+              <ul id="playlist" class="song-list"></ul>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
 
     <div class="modal" id="flowersModal">
-        <div class="modal-content">
-            <button class="modal-close" id="closeFlowers">&times;</button>
-            <div class="modal-body">
-                <h2 class="modal-title" data-i18n="flower.title">送花</h2>
-                <div class="flower-counter">
-                    <p id="flowerCounterText">今日已送：<span id="flowerCount">0</span> / 21 朵</p>
-                    <p id="flowerTotalText" class="flower-total">送花总数：<span id="flowerTotal">0</span> 朵</p>
-                </div>
-                <div class="flower-buttons">
-                    <button class="flower-btn" id="flowerBtn6" data-i18n="flower.btn6">送 6 朵花</button>
-                    <button class="flower-btn" id="flowerBtn15" data-i18n="flower.btn15">送 15 朵花</button>
-                </div>
-                <div class="flower-background" id="flowerBackground">
-                    <div class="flower-images">
-                        <img src="images/flower-image-1.jpg" alt="装饰图片1" class="flower-image" id="flowerImage1">
-                        <img src="images/flower-image-2.jpg" alt="装饰图片2" class="flower-image" id="flowerImage2">
-                    </div>
-                </div>
+      <div class="modal-content">
+        <button class="modal-close" id="closeFlowers">&times;</button>
+        <div class="modal-body">
+          <h2 class="modal-title" data-i18n="flower.title">送花</h2>
+          <div class="flower-counter">
+            <p id="flowerCounterText">
+              今日已送：<span id="flowerCount">0</span> / 21 朵
+            </p>
+            <p id="flowerTotalText" class="flower-total">
+              送花总数：<span id="flowerTotal">0</span> 朵
+            </p>
+          </div>
+          <div class="flower-buttons">
+            <button class="flower-btn" id="flowerBtn6" data-i18n="flower.btn6">
+              送 6 朵花
+            </button>
+            <button
+              class="flower-btn"
+              id="flowerBtn15"
+              data-i18n="flower.btn15"
+            >
+              送 15 朵花
+            </button>
+          </div>
+          <div class="flower-background" id="flowerBackground">
+            <div class="flower-images">
+              <img
+                src="images/flower-image-1.jpg"
+                alt="装饰图片1"
+                class="flower-image"
+                id="flowerImage1"
+              />
+              <img
+                src="images/flower-image-2.jpg"
+                alt="装饰图片2"
+                class="flower-image"
+                id="flowerImage2"
+              />
             </div>
+          </div>
         </div>
+      </div>
     </div>
 
     <div class="modal" id="noticeModal">
-        <div class="modal-content">
-            <button class="modal-close" id="closeNotice">&times;</button>
-            <div class="modal-body">
-                <h2 class="modal-title" data-i18n="notice.title">网站说明</h2>
-                <div class="notice-content">
-                    <div class="notice-section">
-                        <h3 data-i18n="notice.section1.title">1. 网站目的</h3>
-                        <p data-i18n="notice.section1.content">该网站的目的是为了纪念朦胧，非赢利性网站。</p>
-                        
-                        <h3 data-i18n="notice.section2.title">2. 留言规范</h3>
-                        <p data-i18n="notice.section2.content">请各位用户妥善留言...</p>
-                        
-                        <h3 data-i18n="notice.section3.title">3. 资源来源</h3>
-                        <p data-i18n="notice.section3.content">图片、音乐和视频...</p>
-                        
-                        <h3 data-i18n="notice.section4.title">4. 版权声明</h3>
-                        <p data-i18n="notice.section4.content">部分MV作品...</p>
-                        
-                        <h3 data-i18n="notice.section5.title">5. 征集投稿</h3>
-                        <p data-i18n="notice.section5.content">我手里的资源十分有限...</p>
-                        
-                        <h3 data-i18n="notice.section6.title">6. 联系方式</h3>
-                        <p data-i18n="notice.section6.content">以下是我的联系方式...</p>
-                        
-                        <p class="contact-email">
-                            <span data-i18n="notice.email.label">邮箱：</span>
-                            <a href="mailto:your-email@example.com">menglongalan@gmail.com</a>
-                        </p>
-                    </div>
-                </div>
+      <div class="modal-content">
+        <button class="modal-close" id="closeNotice">&times;</button>
+        <div class="modal-body">
+          <h2 class="modal-title" data-i18n="notice.title">网站说明</h2>
+          <div class="notice-content">
+            <div class="notice-section">
+              <h3 data-i18n="notice.section1.title">1. 网站目的</h3>
+              <p data-i18n="notice.section1.content">
+                该网站的目的是为了纪念朦胧，非赢利性网站。
+              </p>
+
+              <h3 data-i18n="notice.section2.title">2. 留言规范</h3>
+              <p data-i18n="notice.section2.content">请各位用户妥善留言...</p>
+
+              <h3 data-i18n="notice.section3.title">3. 资源来源</h3>
+              <p data-i18n="notice.section3.content">图片、音乐和视频...</p>
+
+              <h3 data-i18n="notice.section4.title">4. 版权声明</h3>
+              <p data-i18n="notice.section4.content">部分MV作品...</p>
+
+              <h3 data-i18n="notice.section5.title">5. 征集投稿</h3>
+              <p data-i18n="notice.section5.content">我手里的资源十分有限...</p>
+
+              <h3 data-i18n="notice.section6.title">6. 联系方式</h3>
+              <p data-i18n="notice.section6.content">以下是我的联系方式...</p>
+
+              <p class="contact-email">
+                <span data-i18n="notice.email.label">邮箱：</span>
+                <a href="mailto:your-email@example.com"
+                  >menglongalan@gmail.com</a
+                >
+              </p>
             </div>
+          </div>
         </div>
+      </div>
     </div>
 
     <!-- 管理员登录模态框 -->
     <div class="modal" id="adminLoginModal">
-        <div class="modal-content modal-small">
-            <button class="modal-close" id="closeAdminLogin">&times;</button>
-            <div class="modal-body">
-                <h2 class="modal-title">管理员登录</h2>
-                <div class="admin-login-form">
-                    <input type="password" id="adminPassword" placeholder="请输入管理员密码" class="admin-input">
-                    <button id="adminLoginBtn" class="admin-btn">登录</button>
-                    <p class="admin-error" id="adminError"></p>
-                </div>
-            </div>
+      <div class="modal-content modal-small">
+        <button class="modal-close" id="closeAdminLogin">&times;</button>
+        <div class="modal-body">
+          <h2 class="modal-title">管理员登录</h2>
+          <div class="admin-login-form">
+            <input
+              type="password"
+              id="adminPassword"
+              placeholder="请输入管理员密码"
+              class="admin-input"
+            />
+            <button id="adminLoginBtn" class="admin-btn">登录</button>
+            <p class="admin-error" id="adminError"></p>
+          </div>
         </div>
+      </div>
     </div>
 
     <!-- 管理员后台模态框 -->
     <div class="modal" id="adminPanelModal">
-        <div class="modal-content modal-large">
-            <button class="modal-close" id="closeAdminPanel">&times;</button>
-            <div class="modal-body">
-                <h2 class="modal-title">管理后台</h2>
-                <div class="admin-tabs">
-                    <button class="admin-tab active" id="adminTabMessages" data-tab="messages">留言管理</button>
-                    <button class="admin-tab" id="adminTabFlowers" data-tab="flowers">送花记录</button>
-                </div>
-                <div class="admin-panel">
-                    <!-- 留言管理面板 -->
-                    <div class="admin-tab-content active" id="adminTabContentMessages">
-                        <div class="admin-stats">
-                            <p>总留言数：<span id="adminTotalCount">0</span></p>
-                            <button id="adminLogoutBtn" class="admin-btn-secondary">退出登录</button>
-                        </div>
-                        <div class="admin-messages-list" id="adminMessagesList">
-                            <!-- 留言列表将在这里动态生成 -->
-                        </div>
-                    </div>
-                    <!-- 送花记录面板 -->
-                    <div class="admin-tab-content" id="adminTabContentFlowers">
-                        <div class="admin-stats">
-                            <p>总记录数：<span id="adminFlowerTotalCount">0</span></p>
-                            <div class="admin-filter">
-                                <input type="date" id="adminFlowerDateFilter" placeholder="按日期筛选">
-                                <input type="text" id="adminFlowerIpFilter" placeholder="按IP筛选">
-                                <button id="adminFlowerRefreshBtn" class="admin-btn-secondary">刷新</button>
-                            </div>
-                        </div>
-                        <div class="admin-flowers-list" id="adminFlowersList">
-                            <!-- 送花记录列表将在这里动态生成 -->
-                        </div>
-                    </div>
-                </div>
+      <div class="modal-content modal-large">
+        <button class="modal-close" id="closeAdminPanel">&times;</button>
+        <div class="modal-body">
+          <h2 class="modal-title">管理后台</h2>
+          <div class="admin-tabs">
+            <button
+              class="admin-tab active"
+              id="adminTabMessages"
+              data-tab="messages"
+            >
+              留言管理
+            </button>
+            <button class="admin-tab" id="adminTabFlowers" data-tab="flowers">
+              送花记录
+            </button>
+          </div>
+          <div class="admin-panel">
+            <!-- 留言管理面板 -->
+            <div class="admin-tab-content active" id="adminTabContentMessages">
+              <div class="admin-stats">
+                <p>总留言数：<span id="adminTotalCount">0</span></p>
+                <button id="adminLogoutBtn" class="admin-btn-secondary">
+                  退出登录
+                </button>
+              </div>
+              <div class="admin-messages-list" id="adminMessagesList">
+                <!-- 留言列表将在这里动态生成 -->
+              </div>
             </div>
+            <!-- 送花记录面板 -->
+            <div class="admin-tab-content" id="adminTabContentFlowers">
+              <div class="admin-stats">
+                <p>总记录数：<span id="adminFlowerTotalCount">0</span></p>
+                <div class="admin-filter">
+                  <input
+                    type="date"
+                    id="adminFlowerDateFilter"
+                    placeholder="按日期筛选"
+                  />
+                  <input
+                    type="text"
+                    id="adminFlowerIpFilter"
+                    placeholder="按IP筛选"
+                  />
+                  <button
+                    id="adminFlowerRefreshBtn"
+                    class="admin-btn-secondary"
+                  >
+                    刷新
+                  </button>
+                </div>
+              </div>
+              <div class="admin-flowers-list" id="adminFlowersList">
+                <!-- 送花记录列表将在这里动态生成 -->
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
 
     <!-- 页脚版权声明 -->
     <footer class="site-footer">
-        <div class="footer-content">
-            <p class="footer-copyright" data-i18n="footer.copyright">
-                © 2025 于朦胧纪念网站 | Alan Yu Memorial Website
-            </p>
-            <p class="footer-license">
-                <span data-i18n="footer.license">本网站为非营利性纪念网站，仅供纪念用途</span> | 
-                <a href="LICENSE" target="_blank" rel="license">CC BY-NC-ND 4.0</a>
-            </p>
-        </div>
+      <div class="footer-content">
+        <p class="footer-copyright" data-i18n="footer.copyright">
+          © 2025 于朦胧纪念网站 | Alan Yu Memorial Website
+        </p>
+        <p class="footer-license">
+          <span data-i18n="footer.license"
+            >本网站为非营利性纪念网站，仅供纪念用途</span
+          >
+          |
+          <a href="LICENSE" target="_blank" rel="license">CC BY-NC-ND 4.0</a>
+        </p>
+      </div>
     </footer>
 
     <script src="script.js"></script>
-</body>
+  </body>
 </html>

@@ -1,20 +1,35 @@
 // 管理员登录API
-import { generateAdminToken, verifyAdminPassword } from '../utils/auth.js';
+import { generateAdminToken, verifyAdminPassword } from "../utils/auth.js";
+import { setCorsHeaders, checkRateLimit, getClientIp } from "../utils/cors.js";
 
 export default async function handler(req, res) {
-  // 设置CORS头
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  setCorsHeaders(req, res, {
+    methods: "POST, OPTIONS",
+    headers: "Content-Type, Authorization",
+  });
 
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
 
-  if (req.method !== 'POST') {
+  if (req.method !== "POST") {
     return res.status(405).json({
       success: false,
-      error: 'Method not allowed'
+      error: "Method not allowed",
+    });
+  }
+
+  // 登录限速：每个 IP 每 15 分钟最多 5 次尝试
+  const clientIp = getClientIp(req);
+  const { allowed, retryAfter } = checkRateLimit(
+    `login:${clientIp}`,
+    5,
+    15 * 60 * 1000,
+  );
+  if (!allowed) {
+    return res.status(429).json({
+      success: false,
+      error: `登录尝试过于频繁，请 ${retryAfter} 秒后重试`,
     });
   }
 
@@ -24,7 +39,7 @@ export default async function handler(req, res) {
     if (!password) {
       return res.status(400).json({
         success: false,
-        error: '请输入密码'
+        error: "请输入密码",
       });
     }
 
@@ -32,7 +47,7 @@ export default async function handler(req, res) {
     if (!verifyAdminPassword(password)) {
       return res.status(401).json({
         success: false,
-        error: '密码错误'
+        error: "密码错误",
       });
     }
 
@@ -42,21 +57,20 @@ export default async function handler(req, res) {
     if (!token) {
       return res.status(500).json({
         success: false,
-        error: '生成token失败'
+        error: "生成token失败",
       });
     }
 
     return res.status(200).json({
       success: true,
       token: token,
-      message: '登录成功'
+      message: "登录成功",
     });
   } catch (error) {
-    console.error('管理员登录失败:', error);
+    console.error("管理员登录失败:", error.message);
     return res.status(500).json({
       success: false,
-      error: '登录失败，请稍后重试'
+      error: "登录失败，请稍后重试",
     });
   }
 }
-

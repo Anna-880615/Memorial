@@ -1651,14 +1651,20 @@ class MusicPlayer {
     // 移除 data-i18n 属性，因为现在显示的是歌曲名称，不是翻译文本
     currentSongNameEl.removeAttribute("data-i18n");
 
-    // 封面处理
-    const coverSrc = song.cover.includes("?")
-      ? `${song.cover}&t=${timestamp}`
-      : `${song.cover}?t=${timestamp}`;
-    this.cover.src = coverSrc;
-    this.cover.onerror = () => {
-      this.cover.src = "images/covers/initial.png";
-    };
+    // 封面处理：编码中文路径 + 缓存穿透，兼容不同运行环境
+    if (this.cover) {
+      const coverUrl = new URL(encodeURI(song.cover), window.location.href);
+      coverUrl.searchParams.set("t", Date.now().toString());
+      this.cover.onerror = null;
+      this.cover.src = coverUrl.toString();
+      this.cover.onerror = () => {
+        this.cover.onerror = null;
+        this.cover.src = new URL(
+          "images/covers/initial.png",
+          window.location.href,
+        ).toString();
+      };
+    }
 
     // 列表高亮
     Array.from(document.getElementById("playlist").children).forEach(

@@ -8,7 +8,8 @@ import { getUserLocalDate } from "../../lib/date.js";
 
 export default async function handler(req, res) {
   setCorsHeaders(req, res, { methods: "GET, OPTIONS" });
-  res.setHeader("Cache-Control", "public, max-age=10");
+  // 每用户数据（按 IP 过滤），不能走 CDN 缓存，否则会混淆不同用户的数据
+  res.setHeader("Cache-Control", "private, max-age=10");
 
   if (req.method === "OPTIONS") {
     return res.status(200).end();

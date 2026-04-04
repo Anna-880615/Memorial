@@ -1,6 +1,7 @@
 import { extractAdminToken, verifyAdminToken } from "../../lib/auth.js";
-import { validateText, validateInteger } from "../../lib/validation.js";
-import { setCorsHeaders, checkRateLimit, getClientIp } from "../../lib/cors.js";
+import { validateText } from "../../lib/validation.js";
+import { setCorsHeaders, getClientIp } from "../../lib/cors.js";
+import { checkDbRateLimit } from "../../lib/db-rate-limit.js";
 import { getSupabase } from "../../lib/supabase.js";
 
 export default async function handler(req, res) {
@@ -25,34 +26,56 @@ export default async function handler(req, res) {
       const adminToken = extractAdminToken(req);
       const isAdmin = adminToken && verifyAdminToken(adminToken);
 
-      // 只有非管理员请求才使用缓存（管理员需要看到最新的待审核留言）
-      if (!isAdmin) {
-        // 添加 HTTP 缓存头：留言列表缓存20秒
-        res.setHeader("Cache-Control", "public, max-age=20");
-      } else {
-        // 管理员请求不缓存，确保看到最新数据
-        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-      }
-
-      let query = supabase.from("messages").select("*");
+      let query = supabase.from("messages").select("*", { count: "exact" });
 
       // 如果不是管理员，只返回已审核的留言
       if (!isAdmin) {
         query = query.eq("status", "approved");
       }
 
-      const { data, error } = await query
-        .order("timestamp", { ascending: false })
-        .limit(1000);
+      query = query.order("timestamp", { ascending: false });
 
-      if (error) throw error;
+      if (isAdmin) {
+        // 管理员：不分页，返回全部（上限1000），不缓存
+        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
 
-      return res.status(200).json({
-        success: true,
-        messages: data || [],
-      });
+        const { data, error, count: totalCount } = await query.limit(1000);
+        if (error) throw error;
+
+        return res.status(200).json({
+          success: true,
+          messages: data || [],
+          hasMore: false,
+          total: totalCount || 0,
+        });
+      } else {
+        // 公开访客：分页（默认50条），CDN缓存
+        const page = Math.max(0, parseInt(req.query.page || "0", 10));
+        const limit = Math.min(100, parseInt(req.query.limit || "50", 10));
+        const from = page * limit;
+        const to = from + limit - 1;
+
+        const { data, error, count: totalCount } = await query.range(from, to);
+        if (error) throw error;
+
+        const hasMore = (totalCount || 0) > to + 1;
+
+        res.setHeader(
+          "Cache-Control",
+          "public, s-maxage=20, stale-while-revalidate=40",
+        );
+        res.setHeader("Vary", "Authorization");
+
+        return res.status(200).json({
+          success: true,
+          messages: data || [],
+          hasMore,
+          total: totalCount || 0,
+        });
+      }
     } catch (error) {
       console.error("获取留言失败:", error);
+      res.setHeader("Cache-Control", "no-store");
       return res.status(500).json({
         success: false,
         error: "获取留言失败",
@@ -61,12 +84,14 @@ export default async function handler(req, res) {
   }
 
   if (req.method === "POST") {
-    // 留言限速：每个 IP 每小时最多 10 条
+    // 留言限速：每个 IP 每小时最多 10 条（数据库限速，跨实例有效）
     const clientIp = getClientIp(req);
-    const { allowed, retryAfter } = checkRateLimit(
-      `msg:${clientIp}`,
+    const { allowed, retryAfter } = await checkDbRateLimit(
+      supabase,
+      clientIp,
+      "messages",
       10,
-      60 * 60 * 1000,
+      3600,
     );
     if (!allowed) {
       return res.status(429).json({
@@ -77,7 +102,7 @@ export default async function handler(req, res) {
 
     // 提交新留言
     try {
-      const { text, timestamp } = req.body;
+      const { text } = req.body;
 
       // 验证并清理留言内容
       const validatedText = validateText(text, 1000);
@@ -88,16 +113,8 @@ export default async function handler(req, res) {
         });
       }
 
-      // 验证时间戳（如果提供）
-      const validatedTimestamp = timestamp
-        ? validateInteger(timestamp, 0, Number.MAX_SAFE_INTEGER)
-        : Date.now();
-      if (!validatedTimestamp) {
-        return res.status(400).json({
-          success: false,
-          error: "时间戳无效",
-        });
-      }
+      // 使用服务器时间，不信任客户端时钟
+      const validatedTimestamp = Date.now();
 
       // 简单的敏感词过滤（您可以扩展这个列表）
       const sensitiveWords = []; // 在这里添加敏感词，例如：['敏感词1', '敏感词2']
@@ -117,9 +134,9 @@ export default async function handler(req, res) {
         .from("messages")
         .insert([
           {
-            text: validatedText, // 使用验证后的文本
-            timestamp: validatedTimestamp, // 使用验证后的时间戳
-            status: "pending", // 需要审核
+            text: validatedText,
+            timestamp: validatedTimestamp,
+            status: "pending",
           },
         ])
         .select()

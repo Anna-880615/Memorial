@@ -92,14 +92,16 @@ export default async function handler(req, res) {
 
     if (insertError) throw insertError;
 
-    // 查询送花总数（只查 flower_count 列，减少数据传输）
-    const { data: totalData, error: totalError } = await supabase
-      .from("flower_records")
-      .select("flower_count");
+    // 原子递增送花总数（替代全表扫描）
+    const { data: newTotal, error: updateError } = await supabase.rpc(
+      "increment_flower_total",
+      { amount: validatedCount },
+    );
 
-    if (totalError) throw totalError;
-
-    const total = totalData?.reduce((sum, r) => sum + r.flower_count, 0) || 0;
+    if (updateError) {
+      console.error("Failed to increment flower total:", updateError.message);
+    }
+    const total = newTotal ?? 0;
 
     return res.status(200).json({
       success: true,

@@ -17,6 +17,8 @@ class LanguageManager {
         "message.submit": "发布",
         "message.empty": "请输入留言内容",
         "message.submitted": "留言已提交。",
+        "message.loadMore": "查看更多留言",
+        "message.loading": "加载中...",
         "intro.name": "于朦胧",
         "intro.dates": "(1988年6月15日 - 2025年9月11日)",
         "intro.bio": "出生于新疆乌鲁木齐市，中国内地男演员、歌手、MV导演。",
@@ -83,6 +85,8 @@ class LanguageManager {
         "message.submit": "Post",
         "message.empty": "Please enter a message",
         "message.submitted": "Message submitted.",
+        "message.loadMore": "Load more messages",
+        "message.loading": "Loading...",
         "intro.name": "Alan Yu",
         "intro.dates": "(June 15, 1988 – September 11, 2025)",
         "intro.bio":
@@ -859,6 +863,9 @@ class MessageBoard {
     this.input = document.getElementById("messageInput");
     this.btn = document.getElementById("submitMessage");
     this.messages = [];
+    this.currentPage = 0;
+    this.hasMore = false;
+    this.isLoadingMore = false;
     this.init();
   }
 
@@ -907,19 +914,50 @@ class MessageBoard {
     }
   }
 
-  async loadMessages() {
+  async loadMessages(page = 0) {
     try {
       const apiEndpoint =
         typeof CONFIG !== "undefined" ? CONFIG.API_ENDPOINT : "/api";
-      const url = `${apiEndpoint}/messages`;
+      const url = `${apiEndpoint}/messages?page=${page}&limit=50`;
       const data = await cachedFetch(url);
       if (data.success) {
-        this.messages = data.messages || [];
+        if (page === 0) {
+          this.messages = data.messages || [];
+        } else {
+          // 追加到现有列表，去重
+          const existingIds = new Set(this.messages.map((m) => m.id));
+          const newMessages = (data.messages || []).filter(
+            (m) => !existingIds.has(m.id),
+          );
+          this.messages = [...this.messages, ...newMessages];
+        }
+        this.currentPage = page;
+        this.hasMore = data.hasMore || false;
       }
     } catch (error) {
       console.error("加载留言失败:", error);
-      this.messages = [];
+      if (page === 0) {
+        this.messages = [];
+      }
     }
+  }
+
+  async loadMore() {
+    if (this.isLoadingMore || !this.hasMore) return;
+    this.isLoadingMore = true;
+
+    const loadMoreBtn = this.wrapper?.parentElement?.querySelector(
+      ".load-more-messages",
+    );
+    if (loadMoreBtn) {
+      loadMoreBtn.textContent =
+        languageManager?.t("message.loading") || "加载中...";
+      loadMoreBtn.disabled = true;
+    }
+
+    await this.loadMessages(this.currentPage + 1);
+    this.render();
+    this.isLoadingMore = false;
   }
 
   async submit() {
@@ -953,7 +991,6 @@ class MessageBoard {
         },
         body: JSON.stringify({
           text: text,
-          timestamp: Date.now(),
         }),
       });
 
@@ -1015,6 +1052,26 @@ class MessageBoard {
         `,
       )
       .join("");
+
+    // "查看更多留言" 按钮
+    const parent = this.wrapper.parentElement;
+    if (parent) {
+      let loadMoreBtn = parent.querySelector(".load-more-messages");
+      if (this.hasMore) {
+        if (!loadMoreBtn) {
+          loadMoreBtn = document.createElement("button");
+          loadMoreBtn.className = "load-more-messages";
+          loadMoreBtn.addEventListener("click", () => this.loadMore());
+          parent.appendChild(loadMoreBtn);
+        }
+        loadMoreBtn.textContent =
+          languageManager?.t("message.loadMore") || "查看更多留言";
+        loadMoreBtn.disabled = false;
+        loadMoreBtn.style.display = "block";
+      } else if (loadMoreBtn) {
+        loadMoreBtn.style.display = "none";
+      }
+    }
 
     this.updateFadeVisibility();
   }
@@ -2203,8 +2260,6 @@ class AdminManager {
     const day = String(date.getDate()).padStart(2, "0");
     const hours = String(date.getHours()).padStart(2, "0");
     const minutes = String(date.getMinutes()).padStart(2, "0");
-
-    // 显示真实的送花时间（不篡改）
     return `${year}/${month}/${day} ${hours}:${minutes}`;
   }
 

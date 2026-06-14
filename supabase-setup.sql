@@ -133,3 +133,24 @@ COMMENT ON FUNCTION check_and_log_rate_limit(VARCHAR, VARCHAR, INTEGER, INTEGER)
 --   '0 3 * * *',
 --   'DELETE FROM rate_limit_log WHERE created_at < NOW() - INTERVAL ''2 hours'''
 -- );
+
+-- ============================================
+-- 安全加固：启用 RLS 并收回公开 API 权限
+-- ============================================
+-- 说明：所有读写都通过服务端 API（使用 service_role 密钥）完成。
+-- service_role 自动绕过 RLS 且保留全部权限，因此服务端代码不受影响；
+-- 但匿名访客无法再通过 Supabase Data API 直接读写这些表/函数。
+-- 这与 Supabase 自 2026-04-28 起推行的"新表默认不暴露"策略一致。
+
+ALTER TABLE messages       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE flower_records ENABLE ROW LEVEL SECURITY;
+ALTER TABLE flower_totals  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE rate_limit_log ENABLE ROW LEVEL SECURITY;
+
+REVOKE ALL ON messages, flower_records, flower_totals, rate_limit_log
+  FROM anon, authenticated;
+
+REVOKE EXECUTE ON FUNCTION increment_flower_total(INTEGER),
+                            check_and_log_rate_limit(VARCHAR, VARCHAR, INTEGER, INTEGER),
+                            cleanup_rate_limit_log()
+  FROM anon, authenticated, public;

@@ -2541,4 +2541,25 @@ document.addEventListener("DOMContentLoaded", () => {
   window.adminManager = new AdminManager();
   window.adminManager.setMessageBoard(messageBoard);
   window.adminManager.checkSession();
+
+  // 生日祝福：仅在北京时间（UTC+8）6月15日当天显示
+  showBirthdayMessageIfNeeded();
 });
+
+// 生日祝福 / Birthday message — shown only on June 15 (Beijing time, UTC+8)
+function showBirthdayMessageIfNeeded() {
+  const el = document.getElementById("birthdayMessage");
+  if (!el) return;
+
+  // 将当前时刻换算到北京时间（UTC+8），与访客所在时区无关
+  const now = new Date();
+  const beijing = new Date(now.getTime() + (now.getTimezoneOffset() + 480) * 60000);
+  const isBirthday = beijing.getMonth() === 5 && beijing.getDate() === 15; // 6月 = 5
+
+  if (isBirthday) {
+    // 年份自动更新为当前北京时间的年份（例如 "2026 · "）
+    const yearEl = el.querySelector(".birthday-year");
+    if (yearEl) yearEl.textContent = beijing.getFullYear() + " · ";
+    el.hidden = false;
+  }
+}

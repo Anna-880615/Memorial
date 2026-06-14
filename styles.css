@@ -236,6 +236,23 @@ body {
   opacity: 0.85;
   text-transform: uppercase;
 }
+.name-birthday {
+  display: block;
+  margin-top: 20px;
+  font-size: clamp(18px, 2.2vw, 30px);
+  font-weight: 300;
+  letter-spacing: 3px;
+  opacity: 0;
+  animation: birthdayFadeIn 2.4s ease forwards;
+}
+.name-birthday[hidden] {
+  display: none;
+}
+@keyframes birthdayFadeIn {
+  to {
+    opacity: 0.92;
+  }
+}
 
 /* 轮播控件 */
 .carousel-btn {
@@ -1721,6 +1738,12 @@ body {
   }
   .name-english {
     font-size: clamp(18px, 4vw, 28px);
+  }
+  .name-birthday {
+    font-size: clamp(14px, 4vw, 22px);
+    letter-spacing: 1.5px;
+    margin-top: 16px;
+    padding: 0 16px;
   }
 
   /* 轮播控件 */
